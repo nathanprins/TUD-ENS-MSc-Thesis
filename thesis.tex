@@ -45,6 +45,9 @@
 \usepackage{rotating}
 \usepackage{subfigure}
 
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+
 % Make captions distinguishable
 \usepackage[textfont=bf]{caption}
 
@@ -56,16 +59,16 @@
 \usepackage[plainpages=false]{hyperref} 
 
 % Information that will be filled in at various points in the report
-\newcommand{\reportTitle}{WRITE YOUR THESIS TITLE HERE}
-\newcommand{\reportAuthor}{WRITE YOUR NAME AND SURNAME HERE} % Please put your full and official name here: no abbreviations (and to Dutch students: geen roepnamen)
-\newcommand{\studentNumber}{WRITE YOUR TU DELFT STUDENT NUMBER HERE}
-\newcommand{\reportEmailTUD}{REPORT-YOUR-TU-DELFT-EMAIL-FROM-STUDENT-TUDELFT-NL@student.tudelft.nl}
-\newcommand{\reportEmailNonTUD}{REPORT-YOUR-NON-TU-DELFT-EMAIL@some.other.non.tudelft.nl.domain.com}
+\newcommand{\reportTitle}{Optimizing Connection Establishment and Parameter Adaption in Bluetooth Low-Energy for Intermittent Devices}
+\newcommand{\reportAuthor}{Nathan Prins} % Please put your full and official name here: no abbreviations (and to Dutch students: geen roepnamen)
+\newcommand{\studentNumber}{s5187966}
+\newcommand{\reportEmailTUD}{n.prins-2@student.tudelft.nl}
+\newcommand{\reportEmailNonTUD}{nathanprins@hotmail.com}
 \newcommand{\reportUrlEmailTUD}{\href{mailto:\reportEmailTUD}{\reportEmailTUD}}
 \newcommand{\reportUrlEmailNonTUD}{\href{mailto:\reportEmailNonTUD}{\reportEmailNonTUD}}
-\newcommand{\reportMSC}{PUT TU DELFT PROGRAM THAT YOU FOLLOWED HERE} % Examples are {Embedded Systems} {Computer Engineering} {Computer Science} or {Electrical Engineering}
-\newcommand{\reportDate}{PUT DATE OF PROVIDING THESIS TO GRADUATION COMMITTEE HERE}
-\newcommand{\presentationDate}{PUT DATE OF YOUR PRESENTATION HERE}
+\newcommand{\reportMSC}{Embedded Systems} % Examples are {Embedded Systems} {Computer Engineering} {Computer Science} or {Electrical Engineering}
+\newcommand{\reportDate}{TBD}
+\newcommand{\presentationDate}{TBD}
 \newcommand{\graduationCommittee}{
 PUT THE NAME AND SURNAME OF GRADUATION COMMITTEE MEMBER 1 HERE & Delft University of Technology \\
 PUT THE NAME AND SURNAME OF GRADUATION COMMITTEE MEMBER 2 HERE & Delft University of Technology \\
@@ -163,10 +166,9 @@ PUT THE NAME AND SURNAME OF GRADUATION COMMITTEE MEMBER X HERE & Delft Universit
 \include{chapters/introduction}
 
 % Create chapters
-\include{chapters/chapter_1}
-%\include{chapter_2}
-% ...
-%\include{chapter_X}
+\include{chapters/chapter_2}
+\include{chapters/chapter_3}
+\include{chapters/chapter_4}
 
 % Create conclusions
 \include{chapters/conclusions}

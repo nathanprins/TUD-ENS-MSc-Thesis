@@ -1,2 +1,7 @@
 build/*
 *.pdf
+*.aux
+*.log
+*.fls
+*.gz
+*.fdb_latexmk
