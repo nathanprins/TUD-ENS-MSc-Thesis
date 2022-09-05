@@ -1,0 +1,18 @@
+\babel@toc {british}{}\relax 
+\contentsline {chapter}{Preface}{vii}{chapter*.1}%
+\contentsline {chapter}{\numberline {1}Introduction}{1}{chapter.1}%
+\contentsline {chapter}{\numberline {2}Background}{5}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Wireless Connection}{5}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Advertisers and Scanners}{5}{section.2.2}%
+\contentsline {section}{\numberline {2.3}Connection Parameters}{6}{section.2.3}%
+\contentsline {section}{\numberline {2.4}Services and Characteristics}{7}{section.2.4}%
+\contentsline {section}{\numberline {2.5}Link Layer}{8}{section.2.5}%
+\contentsline {section}{\numberline {2.6}Connection Setup}{8}{section.2.6}%
+\contentsline {chapter}{\numberline {3}Connection Setup and Parameter Adaption}{11}{chapter.3}%
+\contentsline {section}{\numberline {3.1}SECTION TITLE}{11}{section.3.1}%
+\contentsline {chapter}{\numberline {4}Evaluation}{13}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Setup}{13}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Results}{13}{section.4.2}%
+\contentsline {chapter}{\numberline {5}Conclusions}{17}{chapter.5}%
+\contentsline {chapter}{\numberline {6}Future Work}{19}{chapter.6}%
+\contentsline {chapter}{\numberline {A}APPENDIX TITLE}{23}{appendix.A}%
