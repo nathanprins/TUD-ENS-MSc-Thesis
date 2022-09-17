@@ -10,10 +10,10 @@ A wireless connection is setup between at least two devices. Within the bluetoot
 For the sake of this thesis I define three phases for a BLE connection. These phases are:
 \begin{itemize}
     \item \textit{Unconnected}: before any connection is established between the Central and the Peripheral
-    \item \textit{Connecting} or \textit{Connection Setup}: starts from the connection request and ends when the last non-application packet is sent. 
-    \item \textit{Connected} or \textit{Application}: starts when connection setup is finished and only application packets are sent. Application packets are packets that are necessary to fullfil the application. 
+    \item \textit{Connection Setup}: starts from the connection request and ends when the last non-application packet is sent. 
+    \item \textit{Application}: starts when connection setup is finished and only application packets are sent. Application packets are packets that are necessary to fullfil the application. 
 \end{itemize}
-These terms are not officially defined by the BLE specification, but are used throughout the thesis. 
+These terms are not officially defined by the BLE specification, but are used throughout this thesis. 
 
 \section{Advertisers and Scanners}
 When in an unconnected state, the Peripheral and Central can take on the roles of \textit{Advertiser} and \textit{Scanner} respectively. As an Advertiser, a Peripheral sends out advertising packets. Advertising packets can contain up to 31 bytes of advertising data. The structure of the advertising data is shown in Figure \ref{fig:advdata_layout}. The \texttt{AD Type} field is an 8 bit identifier which refers to one of the many predefined advertisement datatypes. This is followed by the length of the data for this type and then the actual data. 
@@ -22,7 +22,7 @@ When in an unconnected state, the Peripheral and Central can take on the roles o
     \centering
     \includegraphics[width=0.8\textwidth,height=6cm,keepaspectratio=true]{images/advertising_data}
     \caption{
-        Layout of the AdvData field for advertisement packets as per the bluetooth core specification \cite{bluetooth_spec}.
+        The layout of the AdvData field for advertisement packets. Advertisement packets allow for 31 bytes of consecutive AD Structures. These structures contain the length of the structure, followed by the AD Type, and finally the AD Data as defined in the specification for that AD Type \cite{bluetooth_spec}.
     }
     \label{fig:advdata_layout}
 \end{figure}
@@ -30,25 +30,51 @@ When in an unconnected state, the Peripheral and Central can take on the roles o
 There are multiple different advertising modes, but the only one used in this thesis is the \texttt{ADV\_IND}. This mode has two traits which are \textbf{Connectable} and \textbf{Scannable}. Connectable means that the Peripheral is open for connection requests. Scannable means that a Central can, as a response to an advertising packet, send a \textit{Scan Request} to request more data from the Perihperal. This data is then sent in the form of a \textit{Scan Response} and allows for another 31 bytes of advertising data.
 
 \section{Connection Parameters}
-The connection setup is initiated by the Central by responding with a \texttt{CONNECT\_IND} packet to an advertisement packet. From this moment a connection between the devices is made and the setup can begin. The parameters which decide the connection configuration are contained within the \texttt{LLData} field of the \texttt{CONNECT\_IND} packet. The most important configuration values to understand are \textit{Connection Interval} (CI) and \textit{Peripheral Latency} (PL). 
+The connection setup is initiated by the Central by responding with a \texttt{CONNECT\_IND} packet to an advertisement packet. From this moment a connection between the devices is made and the setup can begin. The parameters which decide the connection configuration are contained within the \texttt{CONNECT\_IND} packet (\texttt{LLData} field). The most important configuration values to understand are \textit{Connection Interval} (CI) and \textit{Peripheral Latency} (PL). 
 
 \begin{figure}[]
     \centering
     \includegraphics[width=0.8\textwidth,height=6cm,keepaspectratio=true]{images/connection_interval_slave_latency}
     \caption{
-        \color{red} Red \color{black} is the Peripheral and \color{blue} blue \color{black} is the Central. From Nordic Semiconductors \cite{nordic_2022}.
+        An example timeline of communications between a \color{red} Peripheral \color{black} and \color{blue} Central \color{black}. At every connection interval a new chain of transmission events can start. This chain can theoretically continue up until the end of the connection interval. If the Perpipheral Latency is set to $N$, it allows the Peripheral to skip responding to $N$ connection interval events from the Central in order to conserve energy. This can be seen in the third spike \cite{nordic_2022}.
     }
     \label{fig:ci_and_pl}
 \end{figure}
 
 As you can see in Figure \ref{fig:ci_and_pl}, the Connection Interval is the time between the start of chains of transmit (TX) and receive (RX) events. Multiple TX/RX events can happen within one chain, but when there is no more data to be sent then the current chain is over and new data can be transmitted at the following interval. Peripheral Latency defines how many Connection Intervals the Peripheral is allowed to skip. For example, take a CI of 2 seconds and a PL of 0, this means that every two seconds the Central transmits a packet and the Peripheral replies. Now take a CI of 2 and a PL of 1, in this case the Central transmits every two seconds, but the Peripheral is allowed to sleep every other packet, effectively making the time inbetween transmissions four seconds. 
 
+
+\begin{figure}
+    \begin{center}
+    \begin{tabular}{|l|l|}
+        \hline
+        \textbf{Parameter} & \textbf{Constraints} \\
+        \hline
+        Connection Interval & Range: 0x0006 0x0C80 \\
+                            & $Time = N * 1.25ms$ \\
+                            & Time Range: 7.5ms to 4000ms \\
+        \hline
+        Peripheral Latency  & Range: 0x0000 to 0x01F3 \\
+        \hline
+        Supervision Timeout & Range: 0x000A to 0x0C80 \\
+                            & $Time = N * 10ms$ \\
+                            & Time Range: 100ms to 32s \\
+                            & $Timeout \leq (Latency + 1) * Interval$ \\
+        \hline
+    \end{tabular}
+    \end{center}
+    \caption{Connection parameters and parameter constraints.}
+    \label{tbl:conn_params}
+\end{figure}
+
+The units and ranges for the three connection parameters are defined in Table \ref{tbl:conn_params}.
+
 \section{Services and Characteristics}
 \begin{figure}[]
     \centering
     \includegraphics[width=0.5\textwidth,height=6cm,keepaspectratio=true]{images/gatt_service}
     \caption{
-        Architecture of the GATT Server \cite{townsend_cufi}.
+        The architecture of the GATT Server. Functionality is grouped as services. Services contain data as characteristics that can be read from or written to. Descriptors are used as metadata that describe each characteristics and for configuring the server to notify the client of updates from the characteristic they're grouped under \cite{townsend_cufi}.
     }
     \label{fig:gatt_server}
 \end{figure}
@@ -58,7 +84,7 @@ The \textit{Generic Attribute Profile} (GATT) defines how profile and user data 
     \centering
     \includegraphics[width=0.5\textwidth,height=6cm,keepaspectratio=true]{images/heartrate_service}
     \caption{
-        Heart Rate Service \cite{townsend_cufi}.
+        An example of a service. Each element is searchable through its UUID and then uniquely identifiable using its consecutively numbered handle \cite{townsend_cufi}.
     }
     \label{fig:hrs_layout}
 \end{figure}
