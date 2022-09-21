@@ -1,7 +1,201 @@
-\chapter{Connection Setup and Parameter Adaption}
+\chapter{Architecture}
 \label{chp:chapter_3}
 
-This chapter describes the ... In Section~\ref{sec:SECTIONTITLE}, examples are given om how to use tables and figures in this MSc thesis.
+\section{Sharing Connection Parameters}
+\label{sec:ch_3_sharing_params}
+This first solution will address improvement 1 mentioned in Section \ref{sec:introduction_problem_statement}. Unfortunately there is no standard procedure for providing control to the Peripheral when deciding the initial connection parameters. The GAP service does provide a characteristic definition called the Peripheral Preferred Connection Parameters (PPCP). The data contained in the PPCP characteristic is shown in Table \ref{tbl:ppcp_format}. However, this can only be read once the connection has already been established \cite[p.~1361]{bluetooth_spec}. 
 
-\section{SECTION TITLE}
-\label{sec:SECTIONTITLE}
+\begin{table}
+    \begin{center}
+    \begin{tabular}{|l|l|}
+        \hline
+        \textbf{Name} & \textbf{Size (Bytes)} \\
+        \hline
+        Interval Minimum & 2 \\
+        \hline
+        Interval Maximum & 2 \\
+        \hline
+        Peripheral Latency & 2 \\
+        \hline
+        Supervision Timeout & 2 \\
+        \hline
+    \end{tabular}
+    \end{center}
+    \caption{Format of the Peripheral Preferred Connection Parameter characteristic.}
+    \label{tbl:ppcp_format}
+\end{table}
+
+The only way to share the PPCP before a connection has been established is by using the AdvData field within the advertisement packets. The specification defines an AD Type called Service Data, which allows data from a service to be shared as advertisement data. The format for sharing service data has to be defined by the service specification. Unfortunately the GAP service does not define this for the PPCP characteristic.
+
+In order to be BLE compliant the AD Type Manufacturer-Specific Data (type \textbf{OxFF}) is used. This AD Type contains a Company Identifier Code (CIC) in the first two bytes, followed by the custom data. The complete AD structure is shown in Figure \ref{bf:ppcp_adv_data}.
+
+\begin{figure}
+    \begin{center}
+        \begin{bytefield}[bitwidth=2.4em]{12}
+          \bitheader{0-11} \\
+          \bitbox{1}{11}
+          \bitbox{1}{0xFF}
+          \bitbox{2}{0xAFAF}
+          \bitbox{2}{$CI_{min}$}
+          \bitbox{2}{$CI_{max}$}
+          \bitbox{2}{PL}
+          \bitbox{2}{TO}\\
+          \bitbox[t]{2}{$\underbrace{\hspace{5em}}_{\text{\normalsize Header}}$}
+          \bitbox[t]{2}{$\underbrace{\hspace{5em}}_{\text{\normalsize CIC}}$}
+          \bitbox[t]{8}{$\underbrace{\hspace{22em}}_{\text{\normalsize PPCP}}$}
+        \end{bytefield}
+    \end{center}
+    \caption{11th byte contains the length of the rest of the AD structure. 10th byte is the Manufacturer-Specific Data identifier. Bytes 8-9 contain a custom chosen CIC. Byte 0-7 contain the PPCP in the same order as defined in Figure \ref{tbl:ppcp_format}.}
+    \label{bf:ppcp_adv_data}
+\end{figure}
+
+Now that the data is present in the advertisement packets, we need a way to parse it on the side of the Central. Algorithm \ref{alg:on_device_found} shows how this works. Essentially, the first procedure, \texttt{ON\_DEVICE\_FOUND} is called every time the device receives a new advertisement packet. For each new MAC address that is detected a new device entry is added to the record. After that, any advertised data is parsed by the \texttt{PARSE\_ADV\_DATA} procedure and added to the record. If the device has been flagged as the target device then it retrieves the appropriate connection parameters and responds to the advertisement packet with a connection attempt.
+
+To parse the Manufacturer-Specific Data two things happen. First the 16-bit CIC is compared with the one we have defined ourselves. This ensures that data from another vendor is ignored. If that is correct then the remaining 8 bytes, which contain the PPCP, is copied using a single \texttt{memcpy} call into a structure containing a 16-bit integer for each value of the PPCP. 
+
+\begin{algorithm}
+    \caption{Parsing and usage of PPCP by Central}
+    \label{alg:on_device_found}
+    \begin{algorithmic}[1] 
+        \Procedure{on\_device\_found}{$addr,data$}
+            \If {$addr$ not in $record$}
+                \State create $entry$ in $record$ for $addr$
+            \EndIf
+            \State $dev \gets $ find $entry$ for $addr$
+            \State \Call{parse\_adv\_data}{$dev,data$}
+
+            \If{$dev = target\_dev$}
+                \If{$dev$ contains $ppcp$}
+                    \State $params \gets \textit{pcpp}(dev)$
+                \Else
+                    \State $params \gets default$ $parameters$
+                \EndIf
+                \State \Call{connect}{$dev,params$}
+            \EndIf
+        \EndProcedure
+        \Procedure{parse\_adv\_data}{$dev,data$}
+            \For{$ad\_structure$ in $data$}
+                \If{$\textit{type}(ad\_structure) = \textbf{0xFF}$}
+                    \If{$\textit{cic}(ad\_structure) = \textbf{0xAFAF}$}
+                        \State $\textit{ppcp}(dev) \gets $ store $\textit{ppcp}(ad\_structure)$ in $entry$
+                    \EndIf
+                \EndIf
+            \EndFor
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
+
+\section{Reducing Connection Establishment Time}
+The solutions within the three following subsections target improvement 2 of Section \ref{sec:introduction_problem_statement}. In general, these solutions try to decrease the connection setup time by decreasing the number of packets being sent. This can be done since in most cases, from one connection to to another, the same actions need to be taken to set up the connection. By caching the results of these actions on both sides of the connection and defining when this cache can be reused, the connection setup can theoretically be brought back to a single packet.
+
+\subsection{Stage 1: Caching Service Discovery}
+For even the most trivial applications, the process of service discovery contribtute by far the most packets to the connection setup time. As Figure \ref{fig:division_packets} shows, even in our simple demo application nearly 70\% of the packets are for service discovery. Luckily, Bluetooth SIG knows this and provides some methods of detecting chances within the GATT server.
+
+A simplified version of the process of service discovery is captured in Algorithm \ref{alg:service_discovery}. First, a \texttt{read\_by\_type\_request} is sent using the UUID of the service that needs to be discovered. 0 and \textbf{MAX} define the bounds of the search and since nothing has been found, the bounds are set to the extrema. The result of this request will be the first handle of the service (which points to the service itself) and the last handle of the service. See Figure \ref{fig:hrs_layout} for reference. The start and end handles provide the new bounds for the \texttt{read\_by\_type\_request} which is sent for each characteristic and descriptor within the service.
+\begin{algorithm}
+    \caption{Service Discovery within a GATT server}
+    \label{alg:service_discovery}
+    \begin{algorithmic}[1] 
+        \Procedure{discover\_services}{}
+            \For{$service$ in $services$}
+                \State \textbf{send} $\textit{read\_by\_type\_request}(\textit{uuid}(service), 0, \textbf{MAX})$
+                \State \textbf{receive} $start,end \gets \textit{read\_by\_type\_response}()$
+
+                \For{$characteristic$ in $\textit{characteristics}(service)$}
+                    \State \textbf{send} $\textit{read\_by\_type\_request}(\textit{uuid}(characteristic), start, end)$
+                    \State \textbf{receive} $handle \gets \textit{read\_by\_type\_response}()$
+                \EndFor
+            \EndFor
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
+
+In the end, when this process has finished, the result is a list of 16-bit integer values which correspond to all the discovered characteristics. This is the information that needs to be cached. 
+
+The GATT service provides a characteristic called the Database Hash to detect changes within the GATT server. This is a 128-bit value containing a \textbf{AES-CMAC} hash calculated from the database structure. If any single handle is changed or even the order of the services has been changed, then the hash will be different and the client must rediscover the database. If this hash is the same, then it is safe to assume that all handles are the same.
+
+\subsubsection{Packetcraft}
+Packetcraft provides a framework for service discovery. This framework contains hooks for the developer to add platform and application specific code to implement generally useful functionality, like discovery, caching, and configuration. This is done by registering a callback which contains a state handler. 
+
+Within the state handler there are two states that need to be modified to enable caching. During the initialization state (\textit{APP\_DISC\_INIT}) state two pointers need to be registered which point to the handle list and the database hash. Afterwards in the completion state (\textit{APP\_DISC\_CMPL}), when the database hash has been read and the new database is discovered, they can be stored.
+
+For most systems this means reading from and writing to a form of non-volatile storage. However, since the Peripheral (FreeBie) dumps its memory to FRAM every time it goes to sleep, all its memory is functionally non-volatile. This means that it is only necessary to create two arrays in global memory, provide these during initialization, and copy memory back to those pointers once everything has completed.
+
+\subsubsection{Zephyr}
+For Zephyr this is a bit more involved and requires some custom logic to reach the same functionality as is provided in Packetcraft. The logic is captured in Algorithm \ref{alg:zephyr_caching}. The pseudocode is an inlined and linearized version of the original, since that is made up of multiple different functies chained together as asynchronous callbacks.
+
+\begin{algorithm}
+    \caption{Linearized Flow of Database Cache Algorithm}
+    \label{alg:zephyr_caching}
+    \begin{algorithmic}[1] 
+        \Procedure{on\_connected}{}
+            \State \textbf{send} $\Call{read\_db\_hash\_request}{}$
+            \State \textbf{receive} $hash_{remote} \gets \Call{read\_db\_hash\_response}{}$
+            \If{has\_cache}
+                \If {$hash_{local} = hash_{remote}$}
+                    \State $handles \gets \Call{read\_cached\_handles}{}$
+                    \State \Call{configure\_services}{$handles$}
+                    \State \Return
+                \EndIf
+            \EndIf
+            \State $handles \gets\Call{discover\_services}{}$
+            \State \Call{configure\_services}{$handles$}
+            \State \Call{write\_cache}{$hash_{remote}, handles$}
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
+
+Reading and writing the cache is done using Zephyr's NVS library. This library allows the developer to write to non-volatile flash memory using a simple interface. Data is stored as $(id, data)$ pairs. The \textit{id} is a 16-bit integer and the \textit{data} can be an arbitrary size blob of 8-bit integers. After writing, the data can be read again using the unique id.
+
+
+\subsection{Stage 2: Fast Reconnect}
+After the database discovery has completed, it is common for both devices to perform some form of configuration. Usually this means reading the initial values of certain characteristics and writing CCC values such that the GATT server sends notifications when a characteristics value has change. 
+
+In our demo application, configuration accounts for about eight packets. However, the amount of packets during configuration grows linearly with every characteristic that is necessary for the application. Aside from this, due to the Database Hash requests that are sent as a result of the solution in the previous section, four more packets are reintroduced into the connection setup.
+
+Ideally we would like to get rid of these packets altogether, however, this is not possible to do all the time. Creating a Hash of the CCCs would allow us to detect changes, but it would reintroduce another four packets to transfer the hashes. To get rid of these packets entirely it is necessary to define a scenario where these checks and procedures can safely be skipped.
+
+It is only safe to assume that all discovery and configuration has succesfully occured when currently in a connected state. This is where \textbf{Fast Reconnect} comes in. When a connection is terminated from either side using the \textbf{Fast Reconnect} termination reason (\textbf{0x46}), both the Peripheral and Central set the fast reconnect flag. If this flag is set when a new connection is created, then the configuration and Database Hash requests are skipped. 
+
+For both platforms this means the following modifications need to be made:
+\begin{enumerate}
+    \item Add new valid disconnect reason called Fast Reconnect.
+    \item When a Fast Reconnect happens, make the CCCs persist across connections.
+    \item When a Fast Reconnect happens, skip the Database Hash request.
+\end{enumerate}
+How these modifications are implemented for each platform is explained in the following sections.
+
+\subsubsection{Packetcraft}
+The first modification is done by adding a macro definition to the source file to define \texttt{HCI\_ERR\_FAST\_RECONNECT} (this naming scheme follows the source's conventions) as \textbf{0x46}. Luckily there are no checks elsewhere in the source code which check if this is a valid disconnect reason.
+
+To persist the CCCs, it is possible to abuse functionality that already exists as part of the specification. The BLE specification allows for persistent configurations, however, this is only in the case of a bonded connection. Since security is not available between our Peripheral and Central, it is not possible to bond these devices. It is possible to disable the bond check entirely, thus enabling persistent CCCs for all connections.
+
+Although the configuration is now persistent, the device will still redo the configuration when reconnecting. To fix this, the discovery framework is modified. The framework stores its state in a control block. This control block is created with the connection and subsequently destroyed when a connection is dropped. If, upon disconnecting, the disconnect reason is equal to Fast Reconnect, then the control block is kept in memory. When a new connection is opened, the same control block is reused and the discovery framework is left in the same state as when the devices disconnected. Since the discovery framework is also responsible for requesting the Database Hash, this solves both modification 2 and 3.
+
+\subsubsection{Zephyr}
+The first modification is the same as with Packetcraft, but in the case of Zephyr the macro has to be added to a list of valid disconnect reasons. As with Packetcraft, to enable persistent CCCs, the check for a bonded connection is also disabled. Algorithm \ref{alg:zephyr_caching} needs to be slightly altered for the remaining modifications. Algorithm \ref{alg:zephyr_caching_ccc} shows this updated variant.
+
+\begin{algorithm}
+    \caption{Altered Version of Algorithm \ref{alg:zephyr_caching}}
+    \label{alg:zephyr_caching_ccc}
+    \begin{algorithmic}[1] 
+        \Procedure{on\_connected}{}
+            \If{$has\_cache$ is set and $fast\_reconnect$ is set}
+                \State unset $fast\_reconnect$
+                \State \Return
+            \EndIf
+            \State \textbf{send} $\Call{read\_db\_hash\_request}{}$
+            \State \textbf{receive} $hash_{remote} \gets \Call{read\_db\_hash\_response}{}$
+            \If{has\_cache}
+                \If {$hash_{local} = hash_{remote}$}
+                    \State $handles \gets \Call{read\_cached\_handles}{}$
+                    \State \Call{configure\_services}{$handles$}
+                    \State \Return
+                \EndIf
+            \EndIf
+            \State $handles \gets\Call{discover\_services}{}$
+            \State \Call{configure\_services}{$handles$}
+            \State \Call{write\_cache}{$hash_{remote}, handles$}
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}

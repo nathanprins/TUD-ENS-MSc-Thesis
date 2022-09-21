@@ -44,7 +44,7 @@ The connection setup is initiated by the Central by responding with a \texttt{CO
 As you can see in Figure \ref{fig:ci_and_pl}, the Connection Interval is the time between the start of chains of transmit (TX) and receive (RX) events. Multiple TX/RX events can happen within one chain, but when there is no more data to be sent then the current chain is over and new data can be transmitted at the following interval. Peripheral Latency defines how many Connection Intervals the Peripheral is allowed to skip. For example, take a CI of 2 seconds and a PL of 0, this means that every two seconds the Central transmits a packet and the Peripheral replies. Now take a CI of 2 and a PL of 1, in this case the Central transmits every two seconds, but the Peripheral is allowed to sleep every other packet, effectively making the time inbetween transmissions four seconds. 
 
 
-\begin{figure}
+\begin{table}
     \begin{center}
     \begin{tabular}{|l|l|}
         \hline
@@ -65,7 +65,7 @@ As you can see in Figure \ref{fig:ci_and_pl}, the Connection Interval is the tim
     \end{center}
     \caption{Connection parameters and parameter constraints.}
     \label{tbl:conn_params}
-\end{figure}
+\end{table}
 
 The units and ranges for the three connection parameters are defined in Table \ref{tbl:conn_params}.
 
@@ -113,3 +113,10 @@ As previously defined in Section \ref{sec:ch2_wireless_connection}, the connecti
     \item Application
 \end{itemize} 
 The order in which they occur are usually Service Discover, Configuration and then Application, with Link Layer communication starting parallel to the Service Discovery from the start.
+
+\section{Operating Systems}
+The FreeBie project was originally developed using the open-source BLE stack Packetcraft. Due to its architecture it was especially suitable to be modified in the way required for intermittent operation. This is because all OS tasks are managed using a single scheduler which uses a generic sleep method. This sleep method was altered to configure the real-time clock (RTC), dump the memory to FRAM, and to fully power down the SoC.
+
+However, since FreeBie was originally developed, Packetcraft has gone into closed-source development. For this reason, a newer RTOS was chosen for the Central. Zephyr OS is a modern RTOS developed by the Linux Foundation and is now the officially supported stack for Nordic Semiconductors.
+
+**something extra about modifying link layer stack
