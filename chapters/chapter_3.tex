@@ -1,7 +1,7 @@
 \chapter{Architecture}
 \label{chp:chapter_3}
 
-\section{Sharing Connection Parameters}
+\section{Stage 1: Sharing Connection Parameters}
 \label{sec:ch_3_sharing_params}
 This first solution will address improvement 1 mentioned in Section \ref{sec:introduction_problem_statement}. Unfortunately there is no standard procedure for providing control to the Peripheral when deciding the initial connection parameters. The GAP service does provide a characteristic definition called the Peripheral Preferred Connection Parameters (PPCP). The data contained in the PPCP characteristic is shown in Table \ref{tbl:ppcp_format}. However, this can only be read once the connection has already been established \cite[p.~1361]{bluetooth_spec}. 
 
@@ -88,7 +88,7 @@ To parse the Manufacturer-Specific Data two things happen. First the 16-bit CIC 
 \section{Reducing Connection Establishment Time}
 The solutions within the three following subsections target improvement 2 of Section \ref{sec:introduction_problem_statement}. In general, these solutions try to decrease the connection setup time by decreasing the number of packets being sent. This can be done since in most cases, from one connection to to another, the same actions need to be taken to set up the connection. By caching the results of these actions on both sides of the connection and defining when this cache can be reused, the connection setup can theoretically be brought back to a single packet.
 
-\subsection{Stage 1: Caching Service Discovery}
+\subsection{Stage 2: Caching Service Discovery}
 For even the most trivial applications, the process of service discovery contribtute by far the most packets to the connection setup time. As Figure \ref{fig:division_packets} shows, even in our simple demo application nearly 70\% of the packets are for service discovery. Luckily, Bluetooth SIG knows this and provides some methods of detecting chances within the GATT server.
 
 A simplified version of the process of service discovery is captured in Algorithm \ref{alg:service_discovery}. First, a \texttt{read\_by\_type\_request} is sent using the UUID of the service that needs to be discovered. 0 and \textbf{MAX} define the bounds of the search and since nothing has been found, the bounds are set to the extrema. The result of this request will be the first handle of the service (which points to the service itself) and the last handle of the service. See Figure \ref{fig:hrs_layout} for reference. The start and end handles provide the new bounds for the \texttt{read\_by\_type\_request} which is sent for each characteristic and descriptor within the service.
@@ -148,7 +148,7 @@ For Zephyr this is a bit more involved and requires some custom logic to reach t
 Reading and writing the cache is done using Zephyr's NVS library. This library allows the developer to write to non-volatile flash memory using a simple interface. Data is stored as $(id, data)$ pairs. The \textit{id} is a 16-bit integer and the \textit{data} can be an arbitrary size blob of 8-bit integers. After writing, the data can be read again using the unique id.
 
 
-\subsection{Stage 2: Fast Reconnect}
+\subsection{Stage 3: Fast Reconnect}
 After the database discovery has completed, it is common for both devices to perform some form of configuration. Usually this means reading the initial values of certain characteristics and writing CCC values such that the GATT server sends notifications when a characteristics value has change. 
 
 In our demo application, configuration accounts for about eight packets. However, the amount of packets during configuration grows linearly with every characteristic that is necessary for the application. Aside from this, due to the Database Hash requests that are sent as a result of the solution in the previous section, four more packets are reintroduced into the connection setup.
@@ -196,6 +196,113 @@ The first modification is the same as with Packetcraft, but in the case of Zephy
             \State $handles \gets\Call{discover\_services}{}$
             \State \Call{configure\_services}{$handles$}
             \State \Call{write\_cache}{$hash_{remote}, handles$}
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
+
+
+\subsection{Stage 4: Caching Link Layer Exchanges}
+After the optimizations done in the previous sections only nine packets remain. These packets are the \texttt{CONNECT\_IND}, which initiates the connection (cannot get rid of this), and eight packets that belong to link layer  procedures. These procedures exchange link layer parameters such that each controller knows what the other controller supports. The two procedures are:
+\begin{itemize}
+    \item Data Length Update Procedure
+    \item Feature Exchange Procedure
+\end{itemize}
+
+\begin{table}
+    \begin{center}
+    \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{Fields} & \textbf{Content} & \textbf{Example} \\
+        \hline
+        Max RX octets & Number of bytes & 27 \\
+        \hline
+        Max RX time & Microseconds & 328 \\
+        \hline
+        Max TX octets & Number of bytes & 27 \\
+        \hline
+        Max TX time & Microseconds & 328 \\
+        \hline
+    \end{tabular}
+    \end{center}
+    \caption{Content of \textbf{LL\_LENGTH\_REQ} and \textbf{LL\_LENGTH\_RES}.}
+    \label{tbl:dle_packet_content}
+\end{table}
+
+The \textit{Data Length Exchange Procedure} is required to increase the size of the Data Channel Packet Data Unit (PDU). This is the size of the packet as transferred over the air. See Table \ref{tbl:dle_packet_content} for the contents of the request and response packets. When the application requests a read from a characteristic with a size larger than 27 bytes then it first has to perform a Maximum Transferrable Unit (MTU) Exchange to increase the size of the ATT payload to a maximum of 251 bytes. However, if the Data Length Exchange has not yet increased the Data Channel PDU size, then the controller will divide the ATT payload in 27 byte L2CAP fragments. This is because the ATT payload is encapsulated within the Data Channel PDU.
+
+The \textit{Feature Exchange Procedure} might be initiated to exchange the Link Layer parameter for the current supported feature set. The feature set of a controller is represented as a bitfield where each bit corresponds to a feature that is supported (1) or not supported (0). The feature exchange exchanges these bitfields and the used feature set is the logical AND of these fields. Lets say the Central has $FeatureSet_A$ and the Peripheral has $FeatureSet_B$ then after the exchange $FeatureSet_{USED} = FeatureSet_A \land FeatureSet_B$.
+
+Both procedures can be initiated by either the Central or the Peripheral. Although both procedures only need to be initiated once, they often occures twice. This happens because the Link Layer is programmed as an asynchronous state machine and these requests are all pushed into the transmission queue at the start of a connection before anything has been exchanged.
+
+Interestingly, although the BLE specification mentions that these procedures can be cached, neither Packetcraft or Zephyr have implemented this functionality in their controller. 
+
+\subsubsection{Packetcraft and Zephyr}
+Both Packetcraft and Zephyr's work essentially the same. Their link controllers keep a connection context for each connection. All Link Layer parameters are stored in this context. When a connection is created this context is allocated and when a connection is dropped the context is freed. Like with the previous solutions, this is where the information will be cached.
+
+As mentioned previously, the Link Layer is programmed as a state machine. During initialization the state machine schedules all the procedures in a queue. To keep this from happening when the Link Layer parameters have been restored a restore flag is added. Only when the restore flag is \textit{unset} will the procedures be scheduled.
+
+\section{Faster Connection Parameter Adaption}
+When using \textbf{Fast Reconnect} with Stage 4 optimizations, the connection can be dropped and restarted within around eight seconds on average. Aside from the obvious general advantages of quickly being able to setup a connection, this can also be used to change the connection interval (and thus the connection speed) much faster than the regular \texttt{Connection Update Request}.
+
+The specification defines that, when \texttt{Connection Update Request} is accepted, the new parameters will be applied \textit{at least} six packets after the current packet. In practice, however, this means that from the point of the \texttt{Connection Update Request} this usually takes about 10-11 packets. Even at a fast Connection Interval (for intermittent devices) of 1 second this already takes more time than a \textbf{Fast Reconnect} cycle. 
+
+For a regular, battery powered device it is not a significant issue if updating the connection parameters takes several minutes since the battery reserve is large and it is only charged occasionaly. However, for an intermittent device, which has a small energy reserve and harvests energy, this poses a bigger issue. You are left either going \textbf{1)} the conservative route and leaving a lot of potential performance (throughput) on the table but always having enough charge or going \textbf{2)} the greedy route and having the maximum performance but risking not being able to recoup the spent energy because of changing energy availability.
+
+When FreeBie goes to sleep inbetween transmission events it calls the \texttt{PalSysSleep} is called. This is a modified version of Packetcraft's sleep method which handles checkpointing memory regions and configuring the RTC to wakeup the microcontroller in time for the next scheduled system event. When the system is woken up again, the checkpoint is restored and the system resumes from withing the sleep function. 
+
+When the system resumes, the voltage level of the capacitor can be measured using the onboard Analog to Digital Converter (ADC) and the connection rate can be adjusted appropriately. 
+
+\subsection{The Algorithm}
+Algorithm \ref{alg:conn_params_control_system} shows the pseudocode of the algorithm. As the name would suggest, \texttt{AdaptConnParamsToVdd} contains the logic for calculating the new connection parameters based on the capacitor voltage. It starts by calculating the change of voltage since the last time the function was called. Since the function is called every time the system sleeps, which is dependent on the connection rate, the rate of change has to be normalised to seconds, which results in $rate_{normalised}$. 
+
+A target rate $rate_{target}$ is selected based on the voltage level of the capacitor. If the voltage is low then a positive charge rate is chosen, if it is low then a negative charge rate is chosen. For anything in between the charge rate is set to zero to try and maintain the voltage.
+
+The difference between $rate_{target}$ and $rate_{normalised}$ is calculated and multiplied by a factor \textbf{P} which is then added to the current preset level. The method \texttt{LoadPreset} then selects a preset from a list of presets which are ordered in decreasing connection interval and thus in increasing power consumption. Each preset contains the Connection Interval, Peripheral Latency and Supervision Timeout.
+
+\texttt{LoadPreset} copies the new preset into the advertisement data array. If the preset is different than the one that was already loaded a \textbf{true} is returned, otherwise a \textbf{false} is returned. Afterwards, the network can be dropped using \textbf{Fast Reconnect}, the device will start advertising the new PPCP, and the host will reconnect using these new parameters.
+
+
+\begin{algorithm}
+    \caption{Algorithm for Calculating New Connection Parameters}
+    \label{alg:conn_params_control_system}
+    \begin{algorithmic}[1] 
+        \Procedure{PalSysSleep}{}
+            \State \textit{some code before...}
+
+            \If{not $conn\_param\_change\_pending$}
+                \State \Call{AdaptConnParamsToVdd}{}
+            \Else
+                \If{not $net\_restored$}
+                    \State $net\_restore\_pending \gets \textbf{true}$
+                \Else
+                    \State \Call{Disconnect}{FAST\_RECONNECT}
+                \EndIf
+            \EndIf
+
+            \State \textit{...some code after}
+        \EndProcedure
+        \Procedure{AdaptConnParamsToVdd}{}
+            \State $vdd_{current} \gets \Call{MeasureCapacitorVoltage}{}$
+            \State $rate_{vdd} \gets vdd_{current} - vdd_{last}$
+
+            \If{$conn\_is\_active$ \textbf{and} $conn\_setup\_done$}
+                \If{$skips = 0$}
+                    \State $rate_{normalised} = \frac{rate_{vdd} * ticks_{per\_second}}{ticks_{current} - ticks_{last}}$
+
+                    \State $rate_{target} \gets \Call{SelectChargeRate}{vdd_{current}}$
+
+                    \State $rate_{error} \gets rate_{target} - rate_{normalized}$ 
+                    \State $adjustment \gets P * rate_{error}$
+                    \State $preset_{new} \gets preset_{current} + adjustment$
+
+                    \If{$adjustment$ \textbf{and} $\Call{LoadPreset}{preset_{new}}$}
+                        \State $conn\_param\_update\_pending \gets \textbf{true}$
+                        \State $skips \gets 1$
+                    \EndIf
+                \Else
+                    \State $skips \gets skips - 1$
+                \EndIf
+            \EndIf
         \EndProcedure
     \end{algorithmic}
 \end{algorithm}

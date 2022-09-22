@@ -10,17 +10,21 @@
 \contentsline {section}{\numberline {2.6}Connection Setup}{9}{section.2.6}%
 \contentsline {section}{\numberline {2.7}Operating Systems}{10}{section.2.7}%
 \contentsline {chapter}{\numberline {3}Architecture}{11}{chapter.3}%
-\contentsline {section}{\numberline {3.1}Sharing Connection Parameters}{11}{section.3.1}%
+\contentsline {section}{\numberline {3.1}Stage 1: Sharing Connection Parameters}{11}{section.3.1}%
 \contentsline {section}{\numberline {3.2}Reducing Connection Establishment Time}{13}{section.3.2}%
-\contentsline {subsection}{\numberline {3.2.1}Stage 1: Caching Service Discovery}{13}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.1}Stage 2: Caching Service Discovery}{13}{subsection.3.2.1}%
 \contentsline {subsubsection}{Packetcraft}{14}{section*.11}%
 \contentsline {subsubsection}{Zephyr}{14}{section*.12}%
-\contentsline {subsection}{\numberline {3.2.2}Stage 2: Fast Reconnect}{15}{subsection.3.2.2}%
+\contentsline {subsection}{\numberline {3.2.2}Stage 3: Fast Reconnect}{15}{subsection.3.2.2}%
 \contentsline {subsubsection}{Packetcraft}{15}{section*.13}%
 \contentsline {subsubsection}{Zephyr}{16}{section*.14}%
-\contentsline {chapter}{\numberline {4}Evaluation}{17}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Setup}{17}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Results}{17}{section.4.2}%
-\contentsline {chapter}{\numberline {5}Conclusions}{21}{chapter.5}%
-\contentsline {chapter}{\numberline {6}Future Work}{23}{chapter.6}%
-\contentsline {chapter}{\numberline {A}APPENDIX TITLE}{27}{appendix.A}%
+\contentsline {subsection}{\numberline {3.2.3}Stage 4: Caching Link Layer Exchanges}{16}{subsection.3.2.3}%
+\contentsline {subsubsection}{Packetcraft and Zephyr}{17}{section*.16}%
+\contentsline {section}{\numberline {3.3}Faster Connection Parameter Adaption}{17}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}The Algorithm}{18}{subsection.3.3.1}%
+\contentsline {chapter}{\numberline {4}Evaluation}{21}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Setup}{21}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Results}{21}{section.4.2}%
+\contentsline {chapter}{\numberline {5}Conclusions}{25}{chapter.5}%
+\contentsline {chapter}{\numberline {6}Future Work}{27}{chapter.6}%
+\contentsline {chapter}{\numberline {A}APPENDIX TITLE}{31}{appendix.A}%
