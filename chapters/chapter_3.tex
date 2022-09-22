@@ -253,14 +253,45 @@ When FreeBie goes to sleep inbetween transmission events it calls the \texttt{Pa
 When the system resumes, the voltage level of the capacitor can be measured using the onboard Analog to Digital Converter (ADC) and the connection rate can be adjusted appropriately. 
 
 \subsection{The Algorithm}
-Algorithm \ref{alg:conn_params_control_system} shows the pseudocode of the algorithm. As the name would suggest, \texttt{AdaptConnParamsToVdd} contains the logic for calculating the new connection parameters based on the capacitor voltage. It starts by calculating the change of voltage since the last time the function was called. Since the function is called every time the system sleeps, which is dependent on the connection rate, the rate of change has to be normalised to seconds, which results in $rate_{normalised}$. 
+Algorithm \ref{alg:conn_params_control_system} shows the pseudocode of the algorithm. As the name would suggest, \texttt{AdaptConnParamsToVdd} contains the logic for calculating the new connection parameters based on the capacitor voltage. The parameter that is controlled by the system is $preset_{new}$ and is an integer that represents the power level. This integer is a value between $0$ and $N$ and for each value maps to a \textit{preset} within the \textit{preset list}. Each \textit{preset} is a combination of Connection Interval and Peripheral which results in a certain power draw. All \texttt{presets} within the \textit{preset list} are ordered on expected power draw from lowest power draw (0th item) to highest power draw (nth item).
 
-A target rate $rate_{target}$ is selected based on the voltage level of the capacitor. If the voltage is low then a positive charge rate is chosen, if it is low then a negative charge rate is chosen. For anything in between the charge rate is set to zero to try and maintain the voltage.
+The algorithm starts by calculating the slope of the voltage level over time. This is done by taking the difference in voltage between now and the last time the function was called ($rate_vdd$) and multiplying by the number of seconds that have elapsed since then ($rate_{normalised}$).
 
-The difference between $rate_{target}$ and $rate_{normalised}$ is calculated and multiplied by a factor \textbf{P} which is then added to the current preset level. The method \texttt{LoadPreset} then selects a preset from a list of presets which are ordered in decreasing connection interval and thus in increasing power consumption. Each preset contains the Connection Interval, Peripheral Latency and Supervision Timeout.
+\begin{figure}
+    \begin{center}
+        \begin{tikzpicture}
+            \begin{axis}[
+                xmin=0,
+                xmax=6,
+                xlabel={Time Constant},
+                ymin=0,
+                ymax=3,
+                ylabel={Capacitor Voltage}
+            ]
+                \fill [green, fill opacity = 0.4] (0, 0  ) rectangle (600, 240);
+                \fill [red, fill opacity = 0.2]   (0, 260) rectangle (600, 300);
+                \addplot[
+                    domain=0:6
+                ] {3^(1-x)};
+                \addlegendentry{Capacitor Discharge}
+                \addplot[
+                    domain=0:6,
+                    color = red
+                ] {2.15};
+                \addlegendentry{Turn On Voltage}
 
-\texttt{LoadPreset} copies the new preset into the advertisement data array. If the preset is different than the one that was already loaded a \textbf{true} is returned, otherwise a \textbf{false} is returned. Afterwards, the network can be dropped using \textbf{Fast Reconnect}, the device will start advertising the new PPCP, and the host will reconnect using these new parameters.
+            \end{axis}
+        \end{tikzpicture}
+    \end{center}
+    \label{fig:select_charge_rate}
+    \caption{The three different target charge rates. In the red region a negative charge rate is targeted. In the white region the voltage is maintained. In the green region a positive charge rate is targeted.}
+\end{figure}
 
+A target rate $rate_{target}$ is selected based on the voltage level of the capacitor. If the voltage is low then a positive charge rate is chosen, if it is low then a negative charge rate is chosen. For anything in between the charge rate is set to zero to try and maintain the voltage. Figure \ref{fig:select_charge_rate} visualizes these different charge zones.
+
+The difference between $rate_{target}$ and $rate_{normalised}$ is calculated and multiplied by a factor \textbf{P} which is then added to the current preset level. The method \texttt{LoadPreset} then selects a preset from a list of presets which are ordered in decreasing connection interval and thus in increasing power consumption.
+
+\texttt{LoadPreset} copies the new preset into the advertisement data. If the preset is different than the one that was already loaded a \textbf{true} is returned, otherwise a \textbf{false} is returned. Afterwards, the network can be dropped using \textbf{Fast Reconnect}, the device starts advertising again with the newly loaded connection parameters, and the host will reconnect using these new parameters.
 
 \begin{algorithm}
     \caption{Algorithm for Calculating New Connection Parameters}
@@ -306,3 +337,7 @@ The difference between $rate_{target}$ and $rate_{normalised}$ is calculated and
         \EndProcedure
     \end{algorithmic}
 \end{algorithm}
+
+Adjusting the preset based on the charge rate error essentially creates a P-controller ($P_{rate}$) for the charge rate. Moreover, the \texttt{SelectChargeRate} function which selects a charge rate based on the capacitor voltage creates a P-controller (albeit stepped due to the zones) on the capacitor voltage ($P_{voltage}$). Together these control systems form a cascaded P-controller, where the outer controller $P_{voltage}$ creates the setpoint for the inner controller $P_{rate}$. 
+
+If only a single P-controller was used for the voltage, it could happen that due to a slighty too large P value the controller would not step the connection rate down enough to keep the capacitor from discharging in every situation. Due to the second P-controller for the charge rate, the system will always keep adjusting the connection rate in order to target a positive charge rate for the capacitor. In theory this should provide superior robustness and response to non-linear gains.
