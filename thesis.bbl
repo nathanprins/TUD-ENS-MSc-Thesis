@@ -65,6 +65,10 @@ Josiah Hester and Jacob Sorber.
   2019.
 \newblock Last accessed: August 31st, 2022.
 
+\bibitem{nordic_softdevices}
+{Nordic Semiconductor}.
+\newblock Softdevices.
+
 \bibitem{nordic_2022}
 {Nordic Semiconductor}.
 \newblock Building a bluetooth application on nrf connect sdk - part 3
@@ -86,6 +90,10 @@ Mahadev Satyanarayanan, Wei Gao, and Brandon Lucia.
 \newblock In {\em Proceedings of the 20th International Workshop on Mobile
   Computing Systems and Applications}, HotMobile '19, page 45–50, New York,
   NY, USA, 2019. Association for Computing Machinery.
+
+\bibitem{ti_ble_dev_guide}
+{Texas Instruments}.
+\newblock Ti documentation for the ble protocol stack.
 
 \bibitem{townsend_cufi}
 Kevin Townsend, Cufi Carles, Akiba, and Robert Davidson.

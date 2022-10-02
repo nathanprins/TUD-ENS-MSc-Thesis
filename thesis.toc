@@ -3,28 +3,35 @@
 \contentsline {chapter}{\numberline {1}Introduction}{1}{chapter.1}%
 \contentsline {chapter}{\numberline {2}Background}{5}{chapter.2}%
 \contentsline {section}{\numberline {2.1}Wireless Connection}{5}{section.2.1}%
-\contentsline {section}{\numberline {2.2}Advertisers and Scanners}{5}{section.2.2}%
-\contentsline {section}{\numberline {2.3}Connection Parameters}{6}{section.2.3}%
-\contentsline {section}{\numberline {2.4}Services and Characteristics}{8}{section.2.4}%
-\contentsline {section}{\numberline {2.5}Link Layer}{9}{section.2.5}%
-\contentsline {section}{\numberline {2.6}Connection Setup}{9}{section.2.6}%
-\contentsline {section}{\numberline {2.7}Operating Systems}{10}{section.2.7}%
-\contentsline {chapter}{\numberline {3}Architecture}{11}{chapter.3}%
-\contentsline {section}{\numberline {3.1}Stage 1: Sharing Connection Parameters}{11}{section.3.1}%
-\contentsline {section}{\numberline {3.2}Reducing Connection Establishment Time}{13}{section.3.2}%
-\contentsline {subsection}{\numberline {3.2.1}Stage 2: Caching Service Discovery}{13}{subsection.3.2.1}%
-\contentsline {subsubsection}{Packetcraft}{14}{section*.11}%
-\contentsline {subsubsection}{Zephyr}{14}{section*.12}%
-\contentsline {subsection}{\numberline {3.2.2}Stage 3: Fast Reconnect}{15}{subsection.3.2.2}%
-\contentsline {subsubsection}{Packetcraft}{15}{section*.13}%
-\contentsline {subsubsection}{Zephyr}{16}{section*.14}%
-\contentsline {subsection}{\numberline {3.2.3}Stage 4: Caching Link Layer Exchanges}{16}{subsection.3.2.3}%
-\contentsline {subsubsection}{Packetcraft and Zephyr}{17}{section*.16}%
-\contentsline {section}{\numberline {3.3}Faster Connection Parameter Adaption}{17}{section.3.3}%
-\contentsline {subsection}{\numberline {3.3.1}The Algorithm}{18}{subsection.3.3.1}%
-\contentsline {chapter}{\numberline {4}Evaluation}{21}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Setup}{21}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Results}{21}{section.4.2}%
-\contentsline {chapter}{\numberline {5}Conclusions}{25}{chapter.5}%
-\contentsline {chapter}{\numberline {6}Future Work}{27}{chapter.6}%
-\contentsline {chapter}{\numberline {A}APPENDIX TITLE}{31}{appendix.A}%
+\contentsline {section}{\numberline {2.2}Architecture of the BLE Network Stack}{5}{section.2.2}%
+\contentsline {subsubsection}{Physical Layer}{6}{section*.6}%
+\contentsline {subsubsection}{Link Layer}{7}{section*.7}%
+\contentsline {subsubsection}{Host Controller Interface}{7}{section*.8}%
+\contentsline {subsubsection}{Logical Link Control and Adaption Protocol}{7}{section*.9}%
+\contentsline {subsubsection}{Security Manager}{8}{section*.10}%
+\contentsline {subsubsection}{Generic Access Profile}{8}{section*.11}%
+\contentsline {section}{\numberline {2.3}Advertisers and Scanners}{8}{section.2.3}%
+\contentsline {section}{\numberline {2.4}Connection Parameters}{9}{section.2.4}%
+\contentsline {section}{\numberline {2.5}Services and Characteristics}{9}{section.2.5}%
+\contentsline {section}{\numberline {2.6}Link Layer}{11}{section.2.6}%
+\contentsline {section}{\numberline {2.7}Connection Setup}{12}{section.2.7}%
+\contentsline {section}{\numberline {2.8}Operating Systems}{12}{section.2.8}%
+\contentsline {chapter}{\numberline {3}Architecture}{13}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Stage 1: Sharing Connection Parameters}{13}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Reducing Connection Establishment Time}{15}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Stage 2: Caching Service Discovery}{15}{subsection.3.2.1}%
+\contentsline {subsubsection}{Packetcraft}{16}{section*.19}%
+\contentsline {subsubsection}{Zephyr}{16}{section*.20}%
+\contentsline {subsection}{\numberline {3.2.2}Stage 3: Fast Reconnect}{17}{subsection.3.2.2}%
+\contentsline {subsubsection}{Packetcraft}{17}{section*.21}%
+\contentsline {subsubsection}{Zephyr}{18}{section*.22}%
+\contentsline {subsection}{\numberline {3.2.3}Stage 4: Caching Link Layer Exchanges}{18}{subsection.3.2.3}%
+\contentsline {subsubsection}{Packetcraft and Zephyr}{19}{section*.24}%
+\contentsline {section}{\numberline {3.3}Faster Connection Parameter Adaption}{19}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}Backronym For Algorithm Here}{20}{subsection.3.3.1}%
+\contentsline {chapter}{\numberline {4}Evaluation}{23}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Setup}{23}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Results}{23}{section.4.2}%
+\contentsline {chapter}{\numberline {5}Conclusions}{27}{chapter.5}%
+\contentsline {chapter}{\numberline {6}Future Work}{29}{chapter.6}%
+\contentsline {chapter}{\numberline {A}APPENDIX TITLE}{33}{appendix.A}%

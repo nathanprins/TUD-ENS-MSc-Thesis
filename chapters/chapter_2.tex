@@ -1,47 +1,106 @@
 \chapter{Background}
 \label{chp:chapter_2}
 
-In this chapter the necessary background information will be covered to be able to fully understand the architecture of the proposed solutions, as well as defining useful terms. 
+In this chapter, the necessary background information will be covered to be able to fully understand the architecture of the proposed solutions, as well as defining useful terms. 
 
 \section{Wireless Connection}
 \label{sec:ch2_wireless_connection}
-A wireless connection is setup between at least two devices. Within the bluetooth low-energy specification there exists a clear hierarchy, where one device is dominent and is called the Central. The central usually takes the shape of a phone or a laptop. The other side of the connection is with one or more Peripherals. These devices include headphones, smartwatches, IoT sensors, pushbuttons and much more. 
+A wireless connection is a setup between at least two devices. 
 
-For the sake of this thesis I define three phases for a BLE connection. These phases are:
+Within the Bluetooth Low-Energy specification, there exists a clear hierarchy. In this hierarchy, one device is dominant and is called the Central, and the other side of the connection is with one or more Peripherals. The Central usually takes the shape of a phone or a laptop. These devices include headphones, smartwatches, IoT sensors, push buttons, and more. 
+
+For this thesis, we define three phases for a BLE connection. These phases are:
 \begin{itemize}
     \item \textit{Unconnected}: before any connection is established between the Central and the Peripheral
     \item \textit{Connection Setup}: starts from the connection request and ends when the last non-application packet is sent. 
-    \item \textit{Application}: starts when connection setup is finished and only application packets are sent. Application packets are packets that are necessary to fullfil the application. 
+    \item \textit{Application}: starts when connection setup is finished and only application packets are sent. Application packets are packets that are necessary to fulfill the application. 
 \end{itemize}
-These terms are not officially defined by the BLE specification, but are used throughout this thesis. 
+These terms are not officially defined by the BLE specification but are used throughout this thesis. 
+
+\section{Architecture of the BLE Network Stack}
+\begin{figure}[]
+    \centering
+    \includegraphics[width=0.8\textwidth,height=6cm,keepaspectratio=true]{images/ble_stack/ble_stack.drawio.png}
+    \caption{
+        The BLE Network Stack. The controller is comprised of the Physical Layer and the Link Layer. The Generic Access Profile, Security Manager, Generic Attribute Protocol, and Attribute Protocol messages get translated by the Logical Link Control and Adaption Protocol and together form the host. The Host-Controller Interface exists between the host and controller.
+    }
+    \label{fig:ble_stack}
+\end{figure}
+
+As seen in Figure \ref{fig:ble_stack}, the BLE network stack is divided into many layers with increasing levels of abstraction. The bottom-most layers, the Physical Layer (PHY) and Link Layer (LL), form the controller, which is responsible for controlling the connection. The top-most layers, the Generic Access Profile (GAP), Security Manager (SM), Generic Attribute Protocol (GAP), and Attribute Protocol (GATT), provide higher level functionality and APIs which, together with the Logical Link Control and Adaption Protocol (L2CAP) form the host.
+
+The separation of the host and controller is derived from how Bluetooth BR/EDR is implemented, where the host and controller can be implemented separately or even exist on different chips entirely. The host and controller are connected together using a Host-Controller Interface. This separation also allows a single radio to be used with a BR/EDR and BLE controller simultaneously and a generic host to support both versions of Bluetooth.
+
+Nordic Semiconductors supplies the SoftDevice for its microcontrollers, which contains the host and controller in a single qualified, pre-compiled binary \cite{nordic_softdevices}. The Zephyr framework can interface with Nordic's SoftDevice Controller through HCI or, since version 3.0.0, supports its own custom Zephyr BLE Controller. Packetcraft implements the entire stack from application to PHY.
+
+\subsubsection{Physical Layer} The PHY operates at the unlicensed 2.4GHz ISM (industrial, scientific, and medical) band and uses Gaussian frequency-shift keying (GFSK) modulation with adaptive frequency-hopping to reduce collisions. The 2.4GHz band is divided into 40 channels from 2.4000GHz to 2.4835GHz. The radio calculates the next hop using the formula:
+
+\[\text{channel}_{\text{new}} = (\text{channel}_{\text{current}} + \text{hop}) \text{ modulo } 37\]
+    
+where the value \textit{hop} is exchanged when the connection is established.
+
+BLE has a theoretical maximum throughput of 1Mbps for version 4.2 and 2Mbps for version 5.0. However, in practice, this lies much lower. In normal operation (uncoded), every bit is represented by one symbol. From version 5.0 onwards, BLE supports \textit{Coded PHY} where a single bit is represented by 2 to 8 symbols for improved range.
+
+\subsubsection{Link Layer} 
+The link layer (LL) directly controls the PHY and manages the link state. The link layer is the only hard real-time layer of the BLE stack and is partly hardware dependent. For this reason, it is usually implemented and kept separate from the rest of the stack. Zephyr goes even further and splits the link layer up into an upper and a lower link layer (ULL and LLL respectively), where the ULL is hardware agnostic and generic, and the LLL is hardware specific.
+
+The link layer handles the reception and sending of packets with the right timing requirements to actually create and manage a connection. 
+** finish this 
+
+Newer revisions of BLE can add new features to the link layer that can add new functionality or improve throughput. A vender can also choose not to implement functionality that is not required for their application to reduce complexity. The supported features are stored in a 64-bit bitmask. The bitmask needs to be exchanged at the beginning of the connection to make sure a controller on one side does not use a procedure that is not supported by the other controller. Some examples of these features include \textit{LE Encryption} (bit 0), \textit{LE Data Packet Length Extension} (bit 5), \textit{LE 2MB PHY} (bit 11), and \textit{LE Coded PHY} (bit 11), which might sound familiar\cite[p. 2827]{bluetooth_spec}.
+
+A feature that has been mentioned in the list above but not yet addressed is \textit{LE Data Packet Length Extension}. By default, the link layer packet data unit (PDU) allows for 27 bytes of data to be transmitted. The LE Data Packet Length Extension feature allows this to be increased up to 251 bytes for vastly improved throughput. However, higher level protocols like ATT are encapsulated within the LL PDU so the effective application data per packet will be lower than 251 bytes.
+
+\subsubsection{Host Controller Interface}
+The host controller interface provides a standardized way of communicating between the hardware-specific, real-time part of the stack (controller) and the rest, which is more hardware agnostic (host). The HCI can be implemented as a software API if the host and controller exist within the same silicon or using a hardware interface (UART, SPI, $\text{I}^{2}\text{C}$, USB) when the controller is a separate chip. It is common that the host and controller are implemented on the same chip since that reduces power consumption, which is often a large consideration for BLE devices.
+
+The BLE specification defines a set of standardized HCI commands and events that the host and controller exchange with each other, together with a data packet format and control flow rules\cite{townsend_cufi}. Some vendors choose to extend the functionality of HCI by adding custom commands \cite{ti_ble_dev_guide}, which can allow the developer to control low-level settings of the radio.
+
+\subsubsection{Logical Link Control and Adaption Protocol}
+The task of the Logical Link Control and Adaption Protocol (L2CAP) layer is twofold. First, it encapsulates upper-level protocol packets into the standard LL PDUs, functioning as a multiplexer. The converse of this process is called decapsulation. The second function of L2CAP is fragmentation, which happens when an upper-level protocol packet exceeds the supported LL PDU size and has to be split into multiple L2CAP fragments. The L2CAP layer of the receiving side then has to defragment the packets to create the original packet. L2CAP adds a four byte header to each packet it encapsulates, thus reducing the effective packet data size further from 27 to 23 bytes.
+
+\subsubsection{Security Manager}
+The Security Manager (SM) layer contains both a protocol and a group of security related algorithms and procedures. The algorithms are used to generate security keys which can be distributed using the defined procedures. Afterward, the Security Manager Protocol (SMP) can be used by other layers to safely connect and exchange data.
+
+The following procedures are supported by the Security Manager:
+\begin{itemize}
+    \item \textit{Pairing} is when a set of temporary security keys are generated to encrypt the link.
+    \item \textit{Bonding} can be done after \textit{pairing} by exchanging permanent security keys which are stored in non-volatile memory.
+    \item \textit{Encryption Re-establishment} is done to re-use previously stored permanent keys for a new encrypted link without having to \textit{pair} and \textit{bond}.
+\end{itemize}
+
+The process of pairing requires the using to confirm the connection by entering a pincode from the peripheral on the central.
+
+\subsubsection{Generic Access Profile}
+The Generic Access Profile (GAP) layer defines how BLE devices interoperate with eachother.
 
 \section{Advertisers and Scanners}
-When in an unconnected state, the Peripheral and Central can take on the roles of \textit{Advertiser} and \textit{Scanner} respectively. As an Advertiser, a Peripheral sends out advertising packets. Advertising packets can contain up to 31 bytes of advertising data. The structure of the advertising data is shown in Figure \ref{fig:advdata_layout}. The \texttt{AD Type} field is an 8 bit identifier which refers to one of the many predefined advertisement datatypes. This is followed by the length of the data for this type and then the actual data. 
+When in an unconnected state, the Peripheral and Central can take on the roles of \textit{Advertiser} and \textit{Scanner} respectively. As an Advertiser, a Peripheral sends out advertising packets. Advertising packets can contain up to 31 bytes of advertising data. The structure of the advertising data is shown in Figure \ref{fig:advdata_layout}. The \texttt{AD Type} field is an 8-bit identifier that refers to one of the many predefined advertisement datatypes. This is followed by the length of the data for this type and then the actual data. 
 
 \begin{figure}[]
     \centering
     \includegraphics[width=0.8\textwidth,height=6cm,keepaspectratio=true]{images/advertising_data}
     \caption{
-        The layout of the AdvData field for advertisement packets. Advertisement packets allow for 31 bytes of consecutive AD Structures. These structures contain the length of the structure, followed by the AD Type, and finally the AD Data as defined in the specification for that AD Type \cite{bluetooth_spec}.
+        The layout of the AdvData field for advertisement packets. Advertisement packets allow for 31 bytes of consecutive AD Structures. These structures contain the length of the structure, followed by the AD Type, and finally, the AD Data as defined in the specification for that AD Type \cite{bluetooth_spec}.
     }
     \label{fig:advdata_layout}
 \end{figure}
 
-There are multiple different advertising modes, but the only one used in this thesis is the \texttt{ADV\_IND}. This mode has two traits which are \textbf{Connectable} and \textbf{Scannable}. Connectable means that the Peripheral is open for connection requests. Scannable means that a Central can, as a response to an advertising packet, send a \textit{Scan Request} to request more data from the Perihperal. This data is then sent in the form of a \textit{Scan Response} and allows for another 31 bytes of advertising data.
+There are multiple different advertising modes, but the only one used in this thesis is the \texttt{ADV\_IND}. This mode has two traits which are \textbf{Connectable} and \textbf{Scannable}. Connectable means that the Peripheral is open for connection requests. Scannable means that a Central can, as a response to an advertising packet, send a \textit{Scan Request} to request more data from the Peripheral. This data is then sent in the form of a \textit{Scan Response} and allows for another 31 bytes of advertising data.
 
 \section{Connection Parameters}
-The connection setup is initiated by the Central by responding with a \texttt{CONNECT\_IND} packet to an advertisement packet. From this moment a connection between the devices is made and the setup can begin. The parameters which decide the connection configuration are contained within the \texttt{CONNECT\_IND} packet (\texttt{LLData} field). The most important configuration values to understand are \textit{Connection Interval} (CI) and \textit{Peripheral Latency} (PL). 
+The connection setup is initiated by the Central by responding with a \texttt{CONNECT\_IND} packet to an advertisement packet. From this moment, a connection between the devices is made, and the setup can begin. The parameters which decide the connection configuration are contained within the \texttt{CONNECT\_IND} packet (\texttt{LLData} field). The most important configuration values to understand are \textit{Connection Interval} (CI) and \textit{Peripheral Latency} (PL). 
 
 \begin{figure}[]
     \centering
     \includegraphics[width=0.8\textwidth,height=6cm,keepaspectratio=true]{images/connection_interval_slave_latency}
     \caption{
-        An example timeline of communications between a \color{red} Peripheral \color{black} and \color{blue} Central \color{black}. At every connection interval a new chain of transmission events can start. This chain can theoretically continue up until the end of the connection interval. If the Perpipheral Latency is set to $N$, it allows the Peripheral to skip responding to $N$ connection interval events from the Central in order to conserve energy. This can be seen in the third spike \cite{nordic_2022}.
+        An example timeline of communications between a \color{red} Peripheral \color{black} and \color{blue} Central \color{black}. At every connection interval, a new chain of transmission events can start. This chain can theoretically continue up until the end of the connection interval. If the Peripheral Latency is set to $N$, it allows the Peripheral to skip responding to $N$ connection interval events from the Central to conserve energy. This can be seen in the third spike \cite{nordic_2022}.
     }
     \label{fig:ci_and_pl}
 \end{figure}
 
-As you can see in Figure \ref{fig:ci_and_pl}, the Connection Interval is the time between the start of chains of transmit (TX) and receive (RX) events. Multiple TX/RX events can happen within one chain, but when there is no more data to be sent then the current chain is over and new data can be transmitted at the following interval. Peripheral Latency defines how many Connection Intervals the Peripheral is allowed to skip. For example, take a CI of 2 seconds and a PL of 0, this means that every two seconds the Central transmits a packet and the Peripheral replies. Now take a CI of 2 and a PL of 1, in this case the Central transmits every two seconds, but the Peripheral is allowed to sleep every other packet, effectively making the time inbetween transmissions four seconds. 
+As you can see in Figure \ref{fig:ci_and_pl}, the Connection Interval is the time between the start of chains of transmit (TX) and receive (RX) events. Multiple TX/RX events can happen within one chain, but when there is no more data to be sent then the current chain is over, and new data can be transmitted at the following interval. Peripheral Latency defines how many Connection Intervals the Peripheral is allowed to skip. For example, take a CI of 2 seconds and a PL of 0. This means that every two seconds, the Central transmits a packet and the Peripheral replies. Now take a CI of 2 and a PL of 1. In this case, the Central transmits every two seconds, but the Peripheral is allowed to sleep every other packet, effectively making the time between transmissions four seconds. 
 
 
 \begin{table}
@@ -74,11 +133,11 @@ The units and ranges for the three connection parameters are defined in Table \r
     \centering
     \includegraphics[width=0.5\textwidth,height=6cm,keepaspectratio=true]{images/gatt_service}
     \caption{
-        The architecture of the GATT Server. Functionality is grouped as services. Services contain data as characteristics that can be read from or written to. Descriptors are used as metadata that describe each characteristics and for configuring the server to notify the client of updates from the characteristic they're grouped under \cite{townsend_cufi}.
+        The architecture of the GATT Server. Functionality is grouped as services. Services contain data as characteristics that can be read from or written to. Descriptors are used as metadata to describe characteristics and for configuring the server to notify the client of updates from the characteristic they're grouped under \cite{townsend_cufi}.
     }
     \label{fig:gatt_server}
 \end{figure}
-The \textit{Generic Attribute Profile} (GATT) defines how profile and user data is exchanged over a BLE connection. GATT defines the GATT Server, within which functionality is split up into \textit{Services}. Services contain datapoints called \textit{Characteristics}. These characteristics can be interpreted and configured using fields called \textit{Descriptors}. See Figure \ref{fig:gatt_server} for a schematic layout of the GATT Server.
+The \textit{Generic Attribute Profile} (GATT) defines how profile and user data are exchanged over a BLE connection. GATT defines the GATT Server, within which functionality is split up into \textit{Services}. Services contain data points called \textit{Characteristics}. These characteristics can be interpreted and configured using fields called \textit{Descriptors}. See Figure \ref{fig:gatt_server} for a schematic layout of the GATT Server.
 
 \begin{figure}[]
     \centering
@@ -88,21 +147,21 @@ The \textit{Generic Attribute Profile} (GATT) defines how profile and user data 
     }
     \label{fig:hrs_layout}
 \end{figure}
-To give a real world example, take the Heart Rate Service in Figure \ref{fig:hrs_layout}. This service allows a Client to read the heartrate sensor of a device. The heartrate service contains a characteristic called Heartrate. One of the descriptors tells us that the unit is defined as \textbf{beats per minute}. We could read the characteristic value manually, but if we would like to be notified when a new measurement is done then we can set the Notify bit of the \textit{Client Characteristic Configuration} or CCC descriptor.
+For a real-world example, see the Heart Rate Service (HRS) in Figure \ref{fig:hrs_layout}. The HRS allows a Client to read the heart rate sensor of a device. The HRS contains a characteristic called Heartrate. One of the descriptors tells us that the unit is defined as \textbf{beats per minute}. We could read the characteristic value manually, but if we would like to be notified when a new measurement is done, then we can set the Notify bit of the \textit{Client Characteristic Configuration} or CCC descriptor.
 
-To be able to read or write to a Characteristic we need its handle. The handle is a number that is unique for a characteristic within a GATT Server. To find this handle we can perform a \textit{Find By Type Request} using its 16-bit Universally Unique Identifier (UUID). Bluetooth SIG has predefined UUIDs for many predefined Services. Each predefined Service has a specification which defines the shape of the service. This includes all the Characteristics, Descriptors and their respective UUIDs.
+To be able to read or write to a characteristic, we need its handle. A handle is a number that is unique for a characteristic within a GATT Server. To find this handle, we can perform a \textit{Find By Type Request} using its 16-bit Universally Unique Identifier (UUID). Bluetooth SIG has predefined UUIDs for many predefined Services. Each predefined service has a specification that defines the shape of the service. This includes all the characteristics, descriptors, and their respective UUIDs.
 
-The process of finding all these handles is what is called \textit{Service Discovery}. The result of this process is a list of numbers that can be used to read and write to the server. After Service Discovery is done the GATT Servers need to be configured. This usually means writing to the CCC descriptor to setup notifications for the desired Characteristics. This process will henceforth be refered to as Configuration. 
+The process of finding all these handles is what is called \textit{Service Discovery}. The result of this process is a list of handles that can be used to read and write to the server. After Service Discovery is done, the GATT Servers need to be configured. This usually means writing to the CCC descriptor to configure notifications for the desired characteristics. This process will, from here on, be referred to as Configuration. 
 
-Both the Central and the Peripheral can be Servers and Clients at the same time. For example; a phone can provide the central time for a smartwatch to display on the watchface, while the smartwatch measures the heartrate for the phone to display within a health application. This means that a Service Discovery and Configuration needs to be performed by both the Central and the Peripheral.
+Both the Central and the Peripheral can be Servers and Clients at the same time. For example, a phone can provide the central time for a smartwatch to display on the watch face, while the smartwatch measures the heart rate for the phone to present within a health application. This means that a Service Discovery and Configuration need to be performed by both the Central and the Peripheral.
 
 \section{Link Layer}
-The Link Layer is the part of the Bluetooth stack which is tasked with managing the wireless link and actually sending data frames. The Link Layer sits inbetween the higher level protocols like GAP and GATT and the Physical Layer which actually controls the radio.
+The Link Layer is the part of the Bluetooth stack which is tasked with managing the wireless link and actually sending data frames. The Link Layer sits in between the higher level protocols like GAP and GATT and the Physical Layer that actually controls the radio.
 Procedures are defined within the Link Layer to make sure both the transmitting radio and receiving are configured correctly.
 
 The \textit{Features Exchange} procedure is used to exchange which features are supported by both radios. These feature sets can vary widely between versions of Bluetooth and can have a large impact on performance. To guarantee that both sides of the link communicate in the same manner, these features are exchanged by the Link Layer at the start of each connection.
 
-The size of the packets that can be received by a radio can also vary and is usually dependent on the available memory. To make sure the best throughput is achieved this needs to be communicated using the \textit{Data Length Exchange}. This exchanges the largest Air packet that each radio is able to receive at once.
+The size of the packets that can be received by a radio can also vary and is usually dependent on the available memory. To make sure the best throughput is achieved, maximum packet length needs to be communicated using the \textit{Data Length Exchange}. This exchanges the largest Air packet that each radio is able to receive at once.
 
 \section{Connection Setup}
 As previously defined in Section \ref{sec:ch2_wireless_connection}, the connection setup starts from the Connection Request and ends when the last non-application packet is sent. The packets that occur during Connection Setup can be divided into four groups which correspond to the subjects discussed in the previous sections.
@@ -112,11 +171,11 @@ As previously defined in Section \ref{sec:ch2_wireless_connection}, the connecti
     \item Configuration
     \item Application
 \end{itemize} 
-The order in which they occur are usually Service Discover, Configuration and then Application, with Link Layer communication starting parallel to the Service Discovery from the start.
+The order in which they occur is usually Service Discover, Configuration, and then Application, with Link Layer communication starting parallel to the Service Discovery from the start.
 
 \section{Operating Systems}
-The FreeBie project was originally developed using the open-source BLE stack Packetcraft. Due to its architecture it was especially suitable to be modified in the way required for intermittent operation. This is because all OS tasks are managed using a single scheduler which uses a generic sleep method. This sleep method was altered to configure the real-time clock (RTC), dump the memory to FRAM, and to fully power down the SoC.
+The FreeBie project was originally developed using the open-source BLE stack Packetcraft. Due to its architecture, it was especially suitable to be modified in the way required for intermittent operation. This is because all OS tasks are managed using a single scheduler which uses a generic sleep method. This sleep method was altered to configure the real-time clock (RTC), dump the memory to FRAM, and fully power down the SoC.
 
-However, since FreeBie was originally developed, Packetcraft has gone into closed-source development. For this reason, a newer RTOS was chosen for the Central. Zephyr OS is a modern RTOS developed by the Linux Foundation and is now the officially supported stack for Nordic Semiconductors.
+However, since FreeBie was originally developed, Packetcraft has gone into closed-source development. For this reason, a newer RTOS was chosen for the central. Zephyr OS is a modern RTOS developed by the Linux Foundation and is now the officially supported stack for Nordic Semiconductors.
 
 **something extra about modifying link layer stack

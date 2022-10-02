@@ -3,7 +3,7 @@
 
 \section{Stage 1: Sharing Connection Parameters}
 \label{sec:ch_3_sharing_params}
-This first solution will address improvement 1 mentioned in Section \ref{sec:introduction_problem_statement}. Unfortunately there is no standard procedure for providing control to the Peripheral when deciding the initial connection parameters. The GAP service does provide a characteristic definition called the Peripheral Preferred Connection Parameters (PPCP). The data contained in the PPCP characteristic is shown in Table \ref{tbl:ppcp_format}. However, this can only be read once the connection has already been established \cite[p.~1361]{bluetooth_spec}. 
+This first solution will address improvement 1 mentioned in Section \ref{sec:introduction_problem_statement}. Unfortunately, there is no standard procedure for providing control to the Peripheral when deciding the initial connection parameters. The GAP service does provide a characteristic definition called the Peripheral Preferred Connection Parameters (PPCP). The data contained in the PPCP characteristic is shown in Table \ref{tbl:ppcp_format}. However, this can only be read once the connection has already been established \cite[p.~1361]{bluetooth_spec}. 
 
 \begin{table}
     \begin{center}
@@ -25,9 +25,9 @@ This first solution will address improvement 1 mentioned in Section \ref{sec:int
     \label{tbl:ppcp_format}
 \end{table}
 
-The only way to share the PPCP before a connection has been established is by using the AdvData field within the advertisement packets. The specification defines an AD Type called Service Data, which allows data from a service to be shared as advertisement data. The format for sharing service data has to be defined by the service specification. Unfortunately the GAP service does not define this for the PPCP characteristic.
+The only way to share the PPCP before a connection has been established is by using the AdvData field within the advertisement packets. The specification defines an AD Type called Service Data, which allows data from a service to be shared as advertisement data. The format for sharing service data has to be defined by the service specification. Unfortunately, the GAP service does not define this for the PPCP characteristic.
 
-In order to be BLE compliant the AD Type Manufacturer-Specific Data (type \textbf{OxFF}) is used. This AD Type contains a Company Identifier Code (CIC) in the first two bytes, followed by the custom data. The complete AD structure is shown in Figure \ref{bf:ppcp_adv_data}.
+In order to be BLE compliant, the AD Type Manufacturer-Specific Data (type \textbf{OxFF}) is used. This AD Type contains a Company Identifier Code (CIC) in the first two bytes, followed by the custom data. The complete AD structure is shown in Figure \ref{bf:ppcp_adv_data}.
 
 \begin{figure}
     \begin{center}
@@ -45,13 +45,13 @@ In order to be BLE compliant the AD Type Manufacturer-Specific Data (type \textb
           \bitbox[t]{8}{$\underbrace{\hspace{22em}}_{\text{\normalsize PPCP}}$}
         \end{bytefield}
     \end{center}
-    \caption{11th byte contains the length of the rest of the AD structure. 10th byte is the Manufacturer-Specific Data identifier. Bytes 8-9 contain a custom chosen CIC. Byte 0-7 contain the PPCP in the same order as defined in Figure \ref{tbl:ppcp_format}.}
+    \caption{11th byte contains the length of the rest of the AD structure. 10th byte is the Manufacturer-Specific Data identifier. Bytes 8-9 contain a custom-chosen CIC. Byte 0-7 contain the PPCP in the same order as defined in Figure \ref{tbl:ppcp_format}.}
     \label{bf:ppcp_adv_data}
 \end{figure}
 
-Now that the data is present in the advertisement packets, we need a way to parse it on the side of the Central. Algorithm \ref{alg:on_device_found} shows how this works. Essentially, the first procedure, \texttt{ON\_DEVICE\_FOUND} is called every time the device receives a new advertisement packet. For each new MAC address that is detected a new device entry is added to the record. After that, any advertised data is parsed by the \texttt{PARSE\_ADV\_DATA} procedure and added to the record. If the device has been flagged as the target device then it retrieves the appropriate connection parameters and responds to the advertisement packet with a connection attempt.
+Now that the data is present in the advertisement packets, we need a way to parse it on the side of the Central. Algorithm \ref{alg:on_device_found} shows how this works. Essentially, the first procedure, \texttt{ON\_DEVICE\_FOUND}, is called every time the device receives a new advertisement packet. For each new MAC address that is detected, a new device entry is added to the record. After that, any advertised data is parsed by the \texttt{PARSE\_ADV\_DATA} procedure and added to the record. If the device has been flagged as the target device, it retrieves the appropriate connection parameters and responds to the advertisement packet with a connection attempt.
 
-To parse the Manufacturer-Specific Data two things happen. First the 16-bit CIC is compared with the one we have defined ourselves. This ensures that data from another vendor is ignored. If that is correct then the remaining 8 bytes, which contain the PPCP, is copied using a single \texttt{memcpy} call into a structure containing a 16-bit integer for each value of the PPCP. 
+To parse the Manufacturer-Specific Data, two things happen. First, the 16-bit CIC is compared with the one we have defined ourselves. This ensures that data from another vendor is ignored. If that is correct, then the remaining 8 bytes, which contain the PPCP, are copied using a single \texttt{memcpy} call into a structure containing a 16-bit integer for each value of the PPCP. 
 
 \begin{algorithm}
     \caption{Parsing and usage of PPCP by Central}
@@ -86,12 +86,12 @@ To parse the Manufacturer-Specific Data two things happen. First the 16-bit CIC 
 \end{algorithm}
 
 \section{Reducing Connection Establishment Time}
-The solutions within the three following subsections target improvement 2 of Section \ref{sec:introduction_problem_statement}. In general, these solutions try to decrease the connection setup time by decreasing the number of packets being sent. This can be done since in most cases, from one connection to to another, the same actions need to be taken to set up the connection. By caching the results of these actions on both sides of the connection and defining when this cache can be reused, the connection setup can theoretically be brought back to a single packet.
+The solutions within the three following subsections target improvement 2 of Section \ref{sec:introduction_problem_statement}. In general, these solutions try to decrease the connection setup time by decreasing the number of packets being sent. This can be done since, in most cases, from one connection to another, the same actions need to be taken to set up the connection. By caching the results of these actions on both sides of the connection and defining when this cache can be reused, the connection setup can theoretically be brought back to a single packet.
 
 \subsection{Stage 2: Caching Service Discovery}
-For even the most trivial applications, the process of service discovery contribtute by far the most packets to the connection setup time. As Figure \ref{fig:division_packets} shows, even in our simple demo application nearly 70\% of the packets are for service discovery. Luckily, Bluetooth SIG knows this and provides some methods of detecting chances within the GATT server.
+For even the most trivial applications, the process of service discovery contributes by far the most packets to the connection setup time. As Figure \ref{fig:division_packets} shows, even in our simple demo application, nearly 70\% of the packets are for service discovery. Bluetooth SIG knows this and provides some methods of detecting chances within the GATT server.
 
-A simplified version of the process of service discovery is captured in Algorithm \ref{alg:service_discovery}. First, a \texttt{read\_by\_type\_request} is sent using the UUID of the service that needs to be discovered. 0 and \textbf{MAX} define the bounds of the search and since nothing has been found, the bounds are set to the extrema. The result of this request will be the first handle of the service (which points to the service itself) and the last handle of the service. See Figure \ref{fig:hrs_layout} for reference. The start and end handles provide the new bounds for the \texttt{read\_by\_type\_request} which is sent for each characteristic and descriptor within the service.
+A simplified version of the process of service discovery is captured in Algorithm \ref{alg:service_discovery}. First, a \texttt{read\_by\_type\_request} is sent using the UUID of the service that needs to be discovered. 0 and \textbf{MAX} define the bounds of the search and since nothing has been found, the bounds are set to the extrema. The result of this request will be the first handle of the service (which points to the service itself) and the last handle of the service. See Figure \ref{fig:hrs_layout} for reference. The start and end handle provide the new bounds for the \texttt{read\_by\_type\_request}, which is sent for each characteristic and descriptor within the service.
 \begin{algorithm}
     \caption{Service Discovery within a GATT server}
     \label{alg:service_discovery}
@@ -110,19 +110,19 @@ A simplified version of the process of service discovery is captured in Algorith
     \end{algorithmic}
 \end{algorithm}
 
-In the end, when this process has finished, the result is a list of 16-bit integer values which correspond to all the discovered characteristics. This is the information that needs to be cached. 
+At the end, when this process has finished, the result is a list of 16-bit integer values which correspond to all the discovered characteristics. This list is the information that needs to be cached. 
 
-The GATT service provides a characteristic called the Database Hash to detect changes within the GATT server. This is a 128-bit value containing a \textbf{AES-CMAC} hash calculated from the database structure. If any single handle is changed or even the order of the services has been changed, then the hash will be different and the client must rediscover the database. If this hash is the same, then it is safe to assume that all handles are the same.
+The GATT service provides a characteristic called the Database Hash to detect changes within the GATT server. This is a 128-bit value containing a \textbf{AES-CMAC} hash calculated from the database structure. If any single handle is changed or the order of the services is different, then the hash will be different, and the client must rediscover the database. If this hash is the same, then it is safe to assume that all handles are the same as before.
 
 \subsubsection{Packetcraft}
-Packetcraft provides a framework for service discovery. This framework contains hooks for the developer to add platform and application specific code to implement generally useful functionality, like discovery, caching, and configuration. This is done by registering a callback which contains a state handler. 
+Packetcraft provides a framework for service discovery. This framework contains hooks for the developer to add platform and application-specific code to implement generally useful functionality, like discovery, caching and configuration. This is done by registering a callback that contains a state handler. 
 
-Within the state handler there are two states that need to be modified to enable caching. During the initialization state (\textit{APP\_DISC\_INIT}) state two pointers need to be registered which point to the handle list and the database hash. Afterwards in the completion state (\textit{APP\_DISC\_CMPL}), when the database hash has been read and the new database is discovered, they can be stored.
+Within the state handler, there are two states that need to be modified to enable caching. During the initialization state (\textit{APP\_DISC\_INIT}) state two pointers need to be registered that point to the handle list and the database hash. Afterward, in the completion state (\textit{APP\_DISC\_CMPL}), when the database hash has been read and the new database is discovered, these can be stored.
 
-For most systems this means reading from and writing to a form of non-volatile storage. However, since the Peripheral (FreeBie) dumps its memory to FRAM every time it goes to sleep, all its memory is functionally non-volatile. This means that it is only necessary to create two arrays in global memory, provide these during initialization, and copy memory back to those pointers once everything has completed.
+For most systems, this means reading from and writing to a form of non-volatile storage. However, since the Peripheral (FreeBie) dumps its memory to FRAM every time it goes to sleep, all its memory is functionally non-volatile. This means it is only necessary to create two arrays in global memory, provide these during initialization, and copy memory back to those pointers once everything has been completed.
 
 \subsubsection{Zephyr}
-For Zephyr this is a bit more involved and requires some custom logic to reach the same functionality as is provided in Packetcraft. The logic is captured in Algorithm \ref{alg:zephyr_caching}. The pseudocode is an inlined and linearized version of the original, since that is made up of multiple different functies chained together as asynchronous callbacks.
+For Zephyr, this is a bit more involved and requires some custom logic to reach the same functionality as is provided in Packetcraft. The logic is captured in Algorithm \ref{alg:zephyr_caching}. The pseudocode is an inlined and linearized version of the original, since that is made up of multiple different functions chained together as asynchronous callbacks.
 
 \begin{algorithm}
     \caption{Linearized Flow of Database Cache Algorithm}
@@ -145,35 +145,35 @@ For Zephyr this is a bit more involved and requires some custom logic to reach t
     \end{algorithmic}
 \end{algorithm}
 
-Reading and writing the cache is done using Zephyr's NVS library. This library allows the developer to write to non-volatile flash memory using a simple interface. Data is stored as $(id, data)$ pairs. The \textit{id} is a 16-bit integer and the \textit{data} can be an arbitrary size blob of 8-bit integers. After writing, the data can be read again using the unique id.
+Reading and writing to the cache are done using Zephyr's NVS library. This library allows the developer to write to non-volatile flash memory using a simple interface. Data is stored as $(id, data)$ pairs. The \textit{id} is a 16-bit integer and the \textit{data} can be an arbitrary size blob of 8-bit integers. After writing, the data can be read again using the unique id.
 
 
 \subsection{Stage 3: Fast Reconnect}
-After the database discovery has completed, it is common for both devices to perform some form of configuration. Usually this means reading the initial values of certain characteristics and writing CCC values such that the GATT server sends notifications when a characteristics value has change. 
+After the database discovery has been completed, it is common for both devices to perform some form of configuration. This means reading the initial values of certain characteristics and writing CCC values such that the GATT server sends notifications when a characteristics value has changed. 
 
 In our demo application, configuration accounts for about eight packets. However, the amount of packets during configuration grows linearly with every characteristic that is necessary for the application. Aside from this, due to the Database Hash requests that are sent as a result of the solution in the previous section, four more packets are reintroduced into the connection setup.
 
-Ideally we would like to get rid of these packets altogether, however, this is not possible to do all the time. Creating a Hash of the CCCs would allow us to detect changes, but it would reintroduce another four packets to transfer the hashes. To get rid of these packets entirely it is necessary to define a scenario where these checks and procedures can safely be skipped.
+Ideally, we would like to get rid of these packets altogether. However, this is not possible to do all the time. Creating a Hash of the CCCs would allow us to detect changes, but it would reintroduce another four packets to transfer the hashes. To remove these packets entirely, it is necessary to define a scenario where these checks and procedures can safely be skipped.
 
-It is only safe to assume that all discovery and configuration has succesfully occured when currently in a connected state. This is where \textbf{Fast Reconnect} comes in. When a connection is terminated from either side using the \textbf{Fast Reconnect} termination reason (\textbf{0x46}), both the Peripheral and Central set the fast reconnect flag. If this flag is set when a new connection is created, then the configuration and Database Hash requests are skipped. 
+It is only safe to assume that all discovery and configuration has successfully occurred when currently in a connected state. This is where \textbf{Fast Reconnect} comes in. When a connection is terminated from either side using the \textbf{Fast Reconnect} termination reason (\textbf{0x46}), both the Peripheral and Central set the fast reconnect flag. If this flag is set when a new connection is created, then the configuration and Database Hash requests are skipped. 
 
-For both platforms this means the following modifications need to be made:
+For both platforms, this means the following modifications need to be made:
 \begin{enumerate}
-    \item Add new valid disconnect reason called Fast Reconnect.
+    \item Add a new valid disconnect reason called Fast Reconnect.
     \item When a Fast Reconnect happens, make the CCCs persist across connections.
     \item When a Fast Reconnect happens, skip the Database Hash request.
 \end{enumerate}
 How these modifications are implemented for each platform is explained in the following sections.
 
 \subsubsection{Packetcraft}
-The first modification is done by adding a macro definition to the source file to define \texttt{HCI\_ERR\_FAST\_RECONNECT} (this naming scheme follows the source's conventions) as \textbf{0x46}. Luckily there are no checks elsewhere in the source code which check if this is a valid disconnect reason.
+The first modification is done by adding a macro definition to the source file to define \texttt{HCI\_ERR\_FAST\_RECONNECT} (this naming scheme follows the source's conventions) as \textbf{0x46}. There are no checks elsewhere in the source code which check if this is a valid disconnect reason.
 
-To persist the CCCs, it is possible to abuse functionality that already exists as part of the specification. The BLE specification allows for persistent configurations, however, this is only in the case of a bonded connection. Since security is not available between our Peripheral and Central, it is not possible to bond these devices. It is possible to disable the bond check entirely, thus enabling persistent CCCs for all connections.
+To persist the CCCs, it is possible to abuse functionality that already exists as part of the specification. The BLE specification allows for persistent configurations. However, this is only in the case of a bonded connection. Since security is not available between our Peripheral and Central, it is not possible to bond these devices. It is possible to disable the bond check entirely, thus enabling persistent CCCs for all connections.
 
-Although the configuration is now persistent, the device will still redo the configuration when reconnecting. To fix this, the discovery framework is modified. The framework stores its state in a control block. This control block is created with the connection and subsequently destroyed when a connection is dropped. If, upon disconnecting, the disconnect reason is equal to Fast Reconnect, then the control block is kept in memory. When a new connection is opened, the same control block is reused and the discovery framework is left in the same state as when the devices disconnected. Since the discovery framework is also responsible for requesting the Database Hash, this solves both modification 2 and 3.
+Although the configuration is now persistent, the device will still redo the configuration when reconnecting. To fix this, the discovery framework is modified. The framework stores its state in a control block. This control block is created with the connection and subsequently destroyed when a connection is dropped. If the disconnect reason is equal to Fast Reconnect when disconnecting, then the control block is kept in memory. When a new connection is opened, the same control block is reused, and the discovery framework is left in the same state as just before the devices disconnected. Since the discovery framework is also responsible for requesting the Database Hash, this solves both modifications 2 and 3.
 
 \subsubsection{Zephyr}
-The first modification is the same as with Packetcraft, but in the case of Zephyr the macro has to be added to a list of valid disconnect reasons. As with Packetcraft, to enable persistent CCCs, the check for a bonded connection is also disabled. Algorithm \ref{alg:zephyr_caching} needs to be slightly altered for the remaining modifications. Algorithm \ref{alg:zephyr_caching_ccc} shows this updated variant.
+The first modification is the same as with Packetcraft, but in the case of Zephyr, the macro has to be added to a list of valid disconnect reasons. As with Packetcraft, to enable persistent CCCs, the check for a bonded connection is also disabled. Algorithm \ref{alg:zephyr_caching} needs to be slightly altered for the remaining modifications. Algorithm \ref{alg:zephyr_caching_ccc} shows this updated variant.
 
 \begin{algorithm}
     \caption{Altered Version of Algorithm \ref{alg:zephyr_caching}}
@@ -202,7 +202,7 @@ The first modification is the same as with Packetcraft, but in the case of Zephy
 
 
 \subsection{Stage 4: Caching Link Layer Exchanges}
-After the optimizations done in the previous sections only nine packets remain. These packets are the \texttt{CONNECT\_IND}, which initiates the connection (cannot get rid of this), and eight packets that belong to link layer  procedures. These procedures exchange link layer parameters such that each controller knows what the other controller supports. The two procedures are:
+After the optimizations done in the previous sections, only nine packets remain. These packets are the \texttt{CONNECT\_IND}, which initiates the connection (cannot get rid of this), and eight packets that belong to link layer procedures. These procedures exchange link layer parameters such that each controller knows what the other controller supports. The two procedures are:
 \begin{itemize}
     \item Data Length Update Procedure
     \item Feature Exchange Procedure
@@ -228,45 +228,47 @@ After the optimizations done in the previous sections only nine packets remain. 
     \label{tbl:dle_packet_content}
 \end{table}
 
-The \textit{Data Length Exchange Procedure} is required to increase the size of the Data Channel Packet Data Unit (PDU). This is the size of the packet as transferred over the air. See Table \ref{tbl:dle_packet_content} for the contents of the request and response packets. When the application requests a read from a characteristic with a size larger than 27 bytes then it first has to perform a Maximum Transferrable Unit (MTU) Exchange to increase the size of the ATT payload to a maximum of 251 bytes. However, if the Data Length Exchange has not yet increased the Data Channel PDU size, then the controller will divide the ATT payload in 27 byte L2CAP fragments. This is because the ATT payload is encapsulated within the Data Channel PDU.
+The \textit{Data Length Exchange Procedure} is required to increase the size of the Data Channel Packet Data Unit (PDU). This is the size of the packet as transferred over the air. See Table \ref{tbl:dle_packet_content} for the contents of the request and response packets. When the application requests a read from a characteristic with a size larger than 27 bytes, then it first has to perform a Maximum Transferrable Unit (MTU) Exchange to increase the size of the ATT payload to a maximum of 251 bytes. However, if the Data Length Exchange has not yet increased the Data Channel PDU size, then the controller will divide the ATT payload in 27 byte L2CAP fragments. This is because the ATT payload is encapsulated within the Data Channel PDU.
 
-The \textit{Feature Exchange Procedure} might be initiated to exchange the Link Layer parameter for the current supported feature set. The feature set of a controller is represented as a bitfield where each bit corresponds to a feature that is supported (1) or not supported (0). The feature exchange exchanges these bitfields and the used feature set is the logical AND of these fields. Lets say the Central has $FeatureSet_A$ and the Peripheral has $FeatureSet_B$ then after the exchange $FeatureSet_{USED} = FeatureSet_A \land FeatureSet_B$.
+The \textit{Feature Exchange Procedure} might be initiated to exchange the Link Layer parameter for the currently supported feature set. The feature set of a controller is represented as a bitfield where each bit corresponds to a feature that is supported (1) or not supported (0). The feature exchange exchanges these bitfields, and the used feature set is the logical AND of these fields. Lets say the Central has $FeatureSet_A$ and the Peripheral has $FeatureSet_B$ then after the exchange $FeatureSet_{USED} = FeatureSet_A \land FeatureSet_B$.
 
 Both procedures can be initiated by either the Central or the Peripheral. Although both procedures only need to be initiated once, they often occures twice. This happens because the Link Layer is programmed as an asynchronous state machine and these requests are all pushed into the transmission queue at the start of a connection before anything has been exchanged.
 
-Interestingly, although the BLE specification mentions that these procedures can be cached, neither Packetcraft or Zephyr have implemented this functionality in their controller. 
+Although the BLE specification mentions that these procedures can be cached, neither Packetcraft nor Zephyr have implemented this functionality in their controller. 
 
 \subsubsection{Packetcraft and Zephyr}
-Both Packetcraft and Zephyr's work essentially the same. Their link controllers keep a connection context for each connection. All Link Layer parameters are stored in this context. When a connection is created this context is allocated and when a connection is dropped the context is freed. Like with the previous solutions, this is where the information will be cached.
+Both Packetcraft and Zephyr's essentially work the same. Their link controllers keep a connection context for each connection. All Link Layer parameters are stored in this context. When a connection is created, this context is allocated, and when a connection is dropped, the context is freed. Like with the previous solutions, this is where the information will be cached.
 
-As mentioned previously, the Link Layer is programmed as a state machine. During initialization the state machine schedules all the procedures in a queue. To keep this from happening when the Link Layer parameters have been restored a restore flag is added. Only when the restore flag is \textit{unset} will the procedures be scheduled.
+As mentioned previously, the Link Layer is programmed as a state machine. During initialization, the state machine schedules all the procedures in a queue. To keep this from happening when the Link Layer parameters have been restored, a restore flag is added. Only when the restore flag is \textit{unset} will the procedures be scheduled.
 
 \section{Faster Connection Parameter Adaption}
-When using \textbf{Fast Reconnect} with Stage 4 optimizations, the connection can be dropped and restarted within around eight seconds on average. Aside from the obvious general advantages of quickly being able to setup a connection, this can also be used to change the connection interval (and thus the connection speed) much faster than the regular \texttt{Connection Update Request}.
+When using \textbf{Fast Reconnect} with Stage 4 optimizations, the connection can be dropped and restarted within around eight seconds on average \ref{}. Aside from the obvious general advantages of quickly being able to set up a connection, this can also be used to change the connection interval (and thus the connection speed) much faster than the regular \texttt{Connection Update Request}.
 
-The specification defines that, when \texttt{Connection Update Request} is accepted, the new parameters will be applied \textit{at least} six packets after the current packet. In practice, however, this means that from the point of the \texttt{Connection Update Request} this usually takes about 10-11 packets. Even at a fast Connection Interval (for intermittent devices) of 1 second this already takes more time than a \textbf{Fast Reconnect} cycle. 
+The specification defines that, when \texttt{Connection Update Request} is accepted, the new parameters will be applied \textit{at least} six packets after the current packet. In practice, however, this means that from the point of the \texttt{Connection Update Request} this usually takes about 10-11 packets. Even at a fast Connection Interval (for intermittent devices) of 1 second, this already takes more time than a \textbf{Fast Reconnect} cycle. 
 
-For a regular, battery powered device it is not a significant issue if updating the connection parameters takes several minutes since the battery reserve is large and it is only charged occasionaly. However, for an intermittent device, which has a small energy reserve and harvests energy, this poses a bigger issue. You are left either going \textbf{1)} the conservative route and leaving a lot of potential performance (throughput) on the table but always having enough charge or going \textbf{2)} the greedy route and having the maximum performance but risking not being able to recoup the spent energy because of changing energy availability.
+For a regular, battery-powered device, it is not a significant issue if updating the connection parameters takes several minutes since the battery reserve is large and it is only charged occasionally. However, for an intermittent device, which has a small energy reserve and harvests energy, this poses a bigger issue. You are left either going \textbf{1)} the conservative route and leaving a lot of potential performance (throughput) on the table but always having enough charge or going \textbf{2)} the greedy route and having the maximum performance but risking not being able to recoup the spent energy because of changing energy availability.
 
-When FreeBie goes to sleep inbetween transmission events it calls the \texttt{PalSysSleep} is called. This is a modified version of Packetcraft's sleep method which handles checkpointing memory regions and configuring the RTC to wakeup the microcontroller in time for the next scheduled system event. When the system is woken up again, the checkpoint is restored and the system resumes from withing the sleep function. 
+When FreeBie goes to sleep in between transmission events, it calls the \texttt{PalSysSleep} is called. This is a modified version of Packetcraft's sleep method, which handles checkpointing memory regions and configuring the RTC to wake up the microcontroller in time for the next scheduled system event. When the system is woken up again, the checkpoint is restored, and the system resumes from within the sleep function. 
 
-When the system resumes, the voltage level of the capacitor can be measured using the onboard Analog to Digital Converter (ADC) and the connection rate can be adjusted appropriately. 
+When the system resumes, the voltage level of the capacitor can be measured using the onboard Analog to Digital Converter (ADC), and the connection rate can be adjusted appropriately. 
 
-\subsection{The Algorithm}
-Algorithm \ref{alg:conn_params_control_system} shows the pseudocode of the algorithm. As the name would suggest, \texttt{AdaptConnParamsToVdd} contains the logic for calculating the new connection parameters based on the capacitor voltage. The parameter that is controlled by the system is $preset_{new}$ and is an integer that represents the power level. This integer is a value between $0$ and $N$ and for each value maps to a \textit{preset} within the \textit{preset list}. Each \textit{preset} is a combination of Connection Interval and Peripheral which results in a certain power draw. All \texttt{presets} within the \textit{preset list} are ordered on expected power draw from lowest power draw (0th item) to highest power draw (nth item).
+\subsection{Backronym For Algorithm Here}
+Algorithm \ref{alg:conn_params_control_system} shows the pseudocode of the algorithm. As the name would suggest, \texttt{AdaptConnParamsToVdd} contains the logic for calculating the new connection parameters based on the capacitor voltage. 
 
-The algorithm starts by calculating the slope of the voltage level over time. This is done by taking the difference in voltage between now and the last time the function was called ($rate_vdd$) and multiplying by the number of seconds that have elapsed since then ($rate_{normalised}$).
+The parameter that is controlled by the system is $preset_{new}$ and is an integer that represents the power level. This integer has a value between $0$ and $N$ and for each value maps to a \textit{preset} within the \textit{preset list}. Each \textit{preset} contains the PPCP that corresponds to a certain connection speed and, as a result, power draw. All \texttt{presets} within the \textit{preset list} are ordered on expected power draw from lowest power draw ($0^{th}$ item) to highest power draw ($N^{th}$ item).
+
+The algorithm starts by calculating the slope of the voltage level over time. This is done by taking the difference in voltage between now and the last time the function was called ($vdd_{diff}$) and multiplying by the number of seconds that have elapsed since then ($rate_{actual}$). The slope of the voltage over time is essentially the charge/discharge rate.
 
 \begin{figure}
     \begin{center}
-        \begin{tikzpicture}
+        \begin{tikzpicture}[scale=0.7]
             \begin{axis}[
                 xmin=0,
                 xmax=6,
-                xlabel={Time Constant},
+                xlabel={Time (s)},
                 ymin=0,
                 ymax=3,
-                ylabel={Capacitor Voltage}
+                ylabel={Capacitor Voltage (v)}
             ]
                 \fill [green, fill opacity = 0.4] (0, 0  ) rectangle (600, 240);
                 \fill [red, fill opacity = 0.2]   (0, 260) rectangle (600, 300);
@@ -283,15 +285,15 @@ The algorithm starts by calculating the slope of the voltage level over time. Th
             \end{axis}
         \end{tikzpicture}
     \end{center}
+    \caption{The three different target charge rates. Red region: negative charge rate. White region: voltage is maintained. Green region: positive charge rate.}
     \label{fig:select_charge_rate}
-    \caption{The three different target charge rates. In the red region a negative charge rate is targeted. In the white region the voltage is maintained. In the green region a positive charge rate is targeted.}
 \end{figure}
 
-A target rate $rate_{target}$ is selected based on the voltage level of the capacitor. If the voltage is low then a positive charge rate is chosen, if it is low then a negative charge rate is chosen. For anything in between the charge rate is set to zero to try and maintain the voltage. Figure \ref{fig:select_charge_rate} visualizes these different charge zones.
+A target rate $rate_{target}$ is selected based on the voltage level of the capacitor. If the voltage is low, then a positive charge rate is chosen. If it is high, then a negative charge rate is chosen. For anything in between, the charge rate is set to zero to try and maintain the voltage. Figure \ref{fig:select_charge_rate} visualizes these different charge zones.
 
-The difference between $rate_{target}$ and $rate_{normalised}$ is calculated and multiplied by a factor \textbf{P} which is then added to the current preset level. The method \texttt{LoadPreset} then selects a preset from a list of presets which are ordered in decreasing connection interval and thus in increasing power consumption.
+The difference between $rate_{target}$ and $rate_{actual}$ is calculated and multiplied by a factor \textbf{P} which is then added to the current preset level. The method \texttt{LoadPreset} then selects a preset from a list of presets which are ordered in decreasing connection interval and thus in increasing power consumption.
 
-\texttt{LoadPreset} copies the new preset into the advertisement data. If the preset is different than the one that was already loaded a \textbf{true} is returned, otherwise a \textbf{false} is returned. Afterwards, the network can be dropped using \textbf{Fast Reconnect}, the device starts advertising again with the newly loaded connection parameters, and the host will reconnect using these new parameters.
+\texttt{LoadPreset} copies the new preset into the advertisement data. If the preset is different than the one that was already loaded, a \textbf{true} is returned, otherwise, a \textbf{false} is returned. Afterward, the network can be dropped using \textbf{Fast Reconnect}, the device starts advertising again with the newly loaded connection parameters, and the host will reconnect using these new parameters.
 
 \begin{algorithm}
     \caption{Algorithm for Calculating New Connection Parameters}
@@ -314,15 +316,15 @@ The difference between $rate_{target}$ and $rate_{normalised}$ is calculated and
         \EndProcedure
         \Procedure{AdaptConnParamsToVdd}{}
             \State $vdd_{current} \gets \Call{MeasureCapacitorVoltage}{}$
-            \State $rate_{vdd} \gets vdd_{current} - vdd_{last}$
+            \State $vdd_{diff} \gets vdd_{current} - vdd_{last}$
 
             \If{$conn\_is\_active$ \textbf{and} $conn\_setup\_done$}
                 \If{$skips = 0$}
-                    \State $rate_{normalised} = \frac{rate_{vdd} * ticks_{per\_second}}{ticks_{current} - ticks_{last}}$
+                    \State $rate_{actual} = \frac{vdd_{diff} * ticks_{per\_second}}{ticks_{current} - ticks_{last}}$
 
                     \State $rate_{target} \gets \Call{SelectChargeRate}{vdd_{current}}$
 
-                    \State $rate_{error} \gets rate_{target} - rate_{normalized}$ 
+                    \State $rate_{error} \gets rate_{target} - rate_{actual}$ 
                     \State $adjustment \gets P * rate_{error}$
                     \State $preset_{new} \gets preset_{current} + adjustment$
 
@@ -338,6 +340,6 @@ The difference between $rate_{target}$ and $rate_{normalised}$ is calculated and
     \end{algorithmic}
 \end{algorithm}
 
-Adjusting the preset based on the charge rate error essentially creates a P-controller ($P_{rate}$) for the charge rate. Moreover, the \texttt{SelectChargeRate} function which selects a charge rate based on the capacitor voltage creates a P-controller (albeit stepped due to the zones) on the capacitor voltage ($P_{voltage}$). Together these control systems form a cascaded P-controller, where the outer controller $P_{voltage}$ creates the setpoint for the inner controller $P_{rate}$. 
+Adjusting the preset based on the charge rate error essentially creates a P-controller ($P_{rate}$) for the charge rate. Moreover, the \texttt{SelectChargeRate} function which selects a charge rate based on the capacitor voltage creates a P-controller (albeit stepped due to the zones) on the capacitor voltage ($P_{voltage}$). Together these control systems resemble cascaded P-controller, where the outer controller $P_{voltage}$ creates the setpoint for the inner controller $P_{rate}$. 
 
-If only a single P-controller was used for the voltage, it could happen that due to a slighty too large P value the controller would not step the connection rate down enough to keep the capacitor from discharging in every situation. Due to the second P-controller for the charge rate, the system will always keep adjusting the connection rate in order to target a positive charge rate for the capacitor. In theory this should provide superior robustness and response to non-linear gains.
+If only a single P-controller was used for the voltage, it could happen that due to a slightly too large P value the controller would not step the connection rate down enough to keep the capacitor from discharging in every situation. Due to the second P-controller for the charge rate, the system will always keep adjusting the connection rate in order to target a positive charge rate for the capacitor. In theory, this should provide superior robustness and response to non-linear gains.
