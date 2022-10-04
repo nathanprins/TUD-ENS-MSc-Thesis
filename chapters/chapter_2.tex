@@ -1,19 +1,22 @@
 \chapter{Background}
 \label{chp:chapter_2}
+In 1996, Intel, Ericsson, and Nokia came together with the goal of standardizing short-range radio technology for connectivity between different products across many industries. The resulting technology was codenamed Bluetooth, lending its name to King Harald ``Bluetooth'' Gormsson, who was known for uniting Denmark and Norway in 958 and, more importantly, for his dead blue tooth \cite{bluetooth_sig_name}. From this collaboration, the Bluetooth Special Interest Group (SIG) was formed, which released its first version of the standard in 1999. Today, Bluetooth SIG has over 36 thousand members \cite{bluetooth_sig_us}.
 
-In this chapter, the necessary background information will be covered to be able to fully understand the architecture of the proposed solutions, as well as defining useful terms. 
+Bluetooth 4.0 first introduced Bluetooth Low-Energy (BLE) with a focus on low-power devices like wireless headphones and location beacons. BLE was not intended to replace the classic Bluetooth, now called Bluetooth Basic Rate/Enhanced Data Rate (BR/EDR), but live alongside it and expand on the feature set available.
+
+Since its inception, Bluetooth has become one of the most ubiquitous wireless communication technologies, reaching nearly 100\% market saturation in platform devices (phones, tablets, and PCs) \cite{bluetooth_market_update_2022}. In 2022, over 5.1 billion devices were shipped with Bluetooth radios, projected to grow to 7 billion by 2026. By that time, Bluetooth SIG expects 95\% of all Bluetooth devices to support the LE-variant, highlighting BLE's importance.
+
+In this chapter, the background information will be covered to understand the architecture of the solutions proposed to fix the inefficiencies mentioned in Chapter \ref{chp:introduction}. This information includes a high-level overview of the BLE stack, an explanation of the Operating Systems (OS) used to implement the solutions, and some useful definitions. Due to this thesis' focus on software, we will not cover the physical layer (PHY) of the BLE stack. For this, we refer to the Core Specification document \cite{bluetooth_spec}. For a more comprehensive explanation of BLE and how to implement it, we refer to Getting Started with Bluetooth Low Energy \cite{townsend_cufi}.
 
 \section{Wireless Connection}
 \label{sec:ch2_wireless_connection}
-A wireless connection is a setup between at least two devices. 
-
-Within the Bluetooth Low-Energy specification, there exists a clear hierarchy. In this hierarchy, one device is dominant and is called the Central, and the other side of the connection is with one or more Peripherals. The Central usually takes the shape of a phone or a laptop. These devices include headphones, smartwatches, IoT sensors, push buttons, and more. 
+Within the Bluetooth Low-Energy connection, there exists a clear hierarchy, where one device is dominant, and is called the \textit{central}. The central is in control of the connection and is usually a phone, or a laptop. The other side of the connection (one or more) is called the \textit{peripheral}. Typical peripheral devices include headphones, smart watches, IoT sensors, and push buttons. 
 
 For this thesis, we define three phases for a BLE connection. These phases are:
 \begin{itemize}
-    \item \textit{Unconnected}: before any connection is established between the Central and the Peripheral
-    \item \textit{Connection Setup}: starts from the connection request and ends when the last non-application packet is sent. 
-    \item \textit{Application}: starts when connection setup is finished and only application packets are sent. Application packets are packets that are necessary to fulfill the application. 
+    \item \textit{Unconnected}: Before any connection is established between the central and the peripheral.
+    \item \textit{Connection Setup}: Starts from the connection request and ends when the last non-application packet is sent. 
+    \item \textit{Application}: Starts when connection setup is finished and only application packets are sent. Application packets are packets that are necessary to fulfill the application. 
 \end{itemize}
 These terms are not officially defined by the BLE specification but are used throughout this thesis. 
 
@@ -80,7 +83,7 @@ The \textit{synchronization} state is used to listen to periodic advertising tra
         \hline
     \end{tabular}
     \end{center}
-    \caption{Primary advertising packet types.}
+    \caption{Primary advertising PDU types.}
     \label{tbl:adv_types}
 \end{table}
 
@@ -88,20 +91,78 @@ As an advertiser, the device sends out advertising channel packets at a set inte
 
 These advertisement types can have three traits: \textit{connectable}, \textit{scannable} and \textit{directed}. A connectable advertisement type allows initiators to establish a connection using the \texttt{CONNECT\_IND} PDU. Packet types without the connectable trait are only used to broadcast data.
 
-A scannable advertisement type allows a scanner or an initiator to request more data from the advertiser using a \textit{scan request} or \texttt{SCAN\_REQ} PDU. This forces the advertiser to respond with a \textit{scan response} or \texttt{SCAN\_RSP} PDU, which doubles the amount of data that can be broadcast. In this process the scanner or initiator said to perform \textit{active scanning}. On the contrary \textit{passive scanning} is where the scanner or initiator only listens to advertisement packets and never issues a scan request.
+\begin{figure}[]
+    \centering
+    \includegraphics[width=0.6\textwidth,height=6cm,keepaspectratio=true]{images/scanning_modes/scanning_modes.drawio.png}
+    \caption{When a scanner receives a scannable advertisement PDU while passively scanning, no further action is performed. However, when actively scanning, the scanner will perform a \textit{Scan Request}, forcing the advertiser to send more data in the form of a \textit{Scan Response}.}
+    \label{fig:scan_modes}
+\end{figure}
+A scannable advertisement type allows a scanner or an initiator to request more data from the advertiser using a \textit{scan request} or \texttt{SCAN\_REQ} PDU. This forces the advertiser to respond with a \textit{scan response} or \texttt{SCAN\_RSP} PDU, which doubles the amount of data that can be broadcast. In this process, the scanner or initiator is said to perform \textit{active scanning}. On the contrary, \textit{passive scanning} is where the scanner or initiator only listens to advertisement packets and never issues a scan request. The difference between active and passive scanning is show in Figure \ref{fig:scan_modes}
 
 A scanning device can listen for these packets and do nothing, which is called \textit{passive scanning}, or can request more data with a \textit{Scan Request}, which is called \textit{active scanning}. 
 
-Advertising packets can contain up to 31 bytes of advertising data. The structure of the advertising data is shown in Figure \ref{fig:advdata_layout}. The \texttt{AD Type} field is an 8-bit identifier that refers to one of the many predefined advertisement datatypes. This is followed by the length of the data for this type and then the actual data. 
+\newcommand{\bitlabel}[2]{%
+    \bitbox[]{#1}{%
+        \raisebox{0pt}[4ex][0pt]{%
+            \turnbox{45}{\fontsize{7}{7}\selectfont#2}%
+        }%
+    }%
+}
+\newcommand{\textlabel}[2]{%
+    \bitbox[]{#1}{\fontsize{7}{7}\selectfont#2}%
+}
 
-\begin{figure}[]
-    \centering
-    \includegraphics[width=0.8\textwidth,height=6cm,keepaspectratio=true]{images/advertising_data}
-    \caption{
-        The layout of the AdvData field for advertisement packets. Advertisement packets allow for 31 bytes of consecutive AD Structures. These structures contain the length of the structure, followed by the AD Type, and finally, the AD Data as defined in the specification for that AD Type \cite{bluetooth_spec}.
-    }
-    \label{fig:advdata_layout}
+\begin{figure}
+    \begin{center}
+        \begin{bytefield}[bitwidth=2em]{16}
+            \bitbox[]{1}{}\bitbox[]{5}{\textbf{Avertisement PDU}} \\ [1ex]
+            \bitbox[]{1}{\textbf{a}}\bitbox{4}{Header (2 bytes)} \bitbox{12}{Payload (1-255 bytes)} \\
+            \bitbox[]{1}{}\textlabel{4}{6 bytes} \textlabel{12}{0-31 bytes} \\ [3ex]
+
+            \bitbox[]{1}{}
+            \bitbox[]{3}{\textbf{Header}}
+            \bitbox[]{1}{}
+            \bitlabel{1}{RFU}
+            \bitlabel{1}{ChSel}
+            \bitlabel{1}{TxAdd}
+            \bitlabel{1}{RxAdd} \\ [-1.75ex]
+            \bitbox[]{1}{}\bitheader[endianness=little]{0-15} \\
+            \bitbox[]{1}{\textbf{b}}\bitbox{4}{PDU Type}
+            \bitbox{1}{}
+            \bitbox{1}{}
+            \bitbox{1}{}
+            \bitbox{1}{}
+            \bitbox{8}{Length}
+        \end{bytefield}
+    \end{center}
+    \caption{a) Layout of the advertising PDU. b) layout of the advertisement PDU header. PDU Type as defined in Table \ref{tbl:adv_types}. The Length field contains the length of the Payload field in bytes.}
+    \label{fig:adv_pdu}
 \end{figure}
+
+Figure \ref{fig:adv_pdu} shows the content of a generic advertising channel PDU. The first two bytes of the PDU contain the header, followed by 1 to 255 bytes of payload data. The four least significant bits of the header define the type of the advertising channel PDU and refers to the types defined in Table \ref{tbl:adv_types}. The \texttt{length} field contains the length of the Payload field in bytes.
+
+\begin{figure}
+    \begin{center}
+        \begin{bytefield}[bitwidth=2em]{16}
+          \bitbox[]{1}{} \bitbox[]{4}{\textbf{Payload}} \\
+          \bitbox[]{1}{\textbf{a}}\bitbox{4}{AdvA} \bitbox{12}{AdvData} \\
+          \bitbox[]{1}{} \textlabel{4}{6 bytes} \textlabel{12}{0-31 bytes} \\ [-1ex]
+
+          \bitbox[]{1}{} \bitbox[]{4}{\textbf{AdvData}} \\
+          \bitbox[]{1}{\textbf{b}} \bitbox{4}{AD Structure 1} \bitbox{4}{\ldots} \bitbox{4}{AD Structure $N$} \\ [1.4ex]
+
+          \bitbox[]{1}{}\bitbox[]{4}{\textbf{AD Structure}} \\
+          \bitbox[]{1}{\textbf{c}}\bitbox{2}{Length} \bitbox{2}{AD Type} \bitbox{5}{AD Data} \\
+          \bitbox[]{1}{}\textlabel{2}{1 byte} \textlabel{2}{1 byte} \textlabel{5}{Length - 1 bytes}
+        \end{bytefield}
+    \end{center}
+    \caption{a) Advertising channel PDU payload for advertising types of Table \ref{tbl:adv_types}. b) AdvData can contain as many AD Structures as fits in 31 bytes. c) The AD Structure starts with the length of the AD Type and AD Data fields combined, followed by the AD Type, and finally, the AD Data as defined in the specification for that AD Type.}
+    \label{fig:adv_payload}
+\end{figure}
+
+The payload for the four advertising channel PDU types defined in Table \ref{tbl:adv_types} is shown in Figure \ref{fig:adv_payload}a. As seen in Figure \ref{fig:adv_payload}b, \textit{AdvData} can contain any number of \textit{AD Structures}. The AD Structure's \texttt{AD Type} field is an 8-bit identifier that refers to one of the many predefined advertisement datatypes. This is followed by the length of the data for this type and then the actual data. 
+
+Some examples of AD Types include \textit{Local Name}, \textit{TX Power Level}, and \textit{Appearance}. The \textit{Local Name} type allows the device to share its locally assigned device name. For example, one might name its headphones ``John's oPods'', which scanners can display to the user. The \textit{TX Power Level} type can be used to calculate a rough distance estimation between the advertiser and the scanner, and the \textit{appearance} type can tell scanners the general appearance of the advertiser (smart watch, for example).
 
 \subsubsection{Connection Setup and Parameters}
 The connection setup is initiated by the Central by responding with a \texttt{CONNECT\_IND} packet to an advertisement packet. From this moment, a connection between the devices is made, and the setup can begin. The parameters which decide the connection configuration are contained within the \texttt{CONNECT\_IND} packet (\texttt{LLData} field). The most important configuration values to understand are \textit{Connection Interval} (CI) and \textit{Peripheral Latency} (PL). 
