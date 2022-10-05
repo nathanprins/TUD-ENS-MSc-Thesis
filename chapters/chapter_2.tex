@@ -2,21 +2,21 @@
 \label{chp:chapter_2}
 In 1996, Intel, Ericsson, and Nokia came together with the goal of standardizing short-range radio technology for connectivity between different products across many industries. The resulting technology was codenamed Bluetooth, lending its name to King Harald ``Bluetooth'' Gormsson, who was known for uniting Denmark and Norway in 958 and, more importantly, for his dead blue tooth \cite{bluetooth_sig_name}. From this collaboration, the Bluetooth Special Interest Group (SIG) was formed, which released its first version of the standard in 1999. Today, Bluetooth SIG has over 36 thousand members \cite{bluetooth_sig_us}.
 
-Bluetooth 4.0 first introduced Bluetooth Low-Energy (BLE) with a focus on low-power devices like wireless headphones and location beacons. BLE was not intended to replace the classic Bluetooth, now called Bluetooth Basic Rate/Enhanced Data Rate (BR/EDR), but live alongside it and expand on the feature set available.
+Bluetooth 4.0 first introduced Bluetooth Low-Energy (BLE) with a focus on low-power devices like wireless headphones and location beacons. BLE was not intended to replace the classic Bluetooth, now called Bluetooth Basic Rate/Enhanced Data Rate (BR/EDR), but to live alongside it and expand on the feature set available.
 
 Since its inception, Bluetooth has become one of the most ubiquitous wireless communication technologies, reaching nearly 100\% market saturation in platform devices (phones, tablets, and PCs) \cite{bluetooth_market_update_2022}. In 2022, over 5.1 billion devices were shipped with Bluetooth radios, projected to grow to 7 billion by 2026. By that time, Bluetooth SIG expects 95\% of all Bluetooth devices to support the LE-variant, highlighting BLE's importance.
 
-In this chapter, the background information will be covered to understand the architecture of the solutions proposed to fix the inefficiencies mentioned in Chapter \ref{chp:introduction}. This information includes a high-level overview of the BLE stack, an explanation of the Operating Systems (OS) used to implement the solutions, and some useful definitions. Due to this thesis' focus on software, we will not cover the physical layer (PHY) of the BLE stack. For this, we refer to the Core Specification document \cite{bluetooth_spec}. For a more comprehensive explanation of BLE and how to implement it, we refer to Getting Started with Bluetooth Low Energy \cite{townsend_cufi}.
+In this chapter, the background information will be covered to understand the architecture of the solutions proposed to fix the inefficiencies mentioned in Chapter \ref{chp:introduction}. This information includes a high-level overview of the BLE stack, an explanation of the Operating Systems (OS) used to implement the solutions, and some useful definitions. For a more comprehensive explanation of BLE and how to implement it, we refer to Getting Started with Bluetooth Low Energy \cite{townsend_cufi}.
 
 \section{Wireless Connection}
 \label{sec:ch2_wireless_connection}
-Within the Bluetooth Low-Energy connection, there exists a clear hierarchy, where one device is dominant, and is called the \textit{central}. The central is in control of the connection and is usually a phone, or a laptop. The other side of the connection (one or more) is called the \textit{peripheral}. Typical peripheral devices include headphones, smart watches, IoT sensors, and push buttons. 
+Within the Bluetooth Low-Energy connection, there exists a clear hierarchy, where one device is dominant and is called the \textit{central}. The central is in control of the connection and is usually a phone or a laptop. The other side of the connection (one or more) is called the \textit{peripheral}. Typical peripheral devices include headphones, smart watches, IoT sensors, and push buttons. 
 
 For this thesis, we define three phases for a BLE connection. These phases are:
 \begin{itemize}
     \item \textit{Unconnected}: Before any connection is established between the central and the peripheral.
     \item \textit{Connection Setup}: Starts from the connection request and ends when the last non-application packet is sent. 
-    \item \textit{Application}: Starts when connection setup is finished and only application packets are sent. Application packets are packets that are necessary to fulfill the application. 
+    \item \textit{Application}: Starts when connection setup is finished, and only application packets are sent. Application packets are packets that are necessary to fulfill the application. 
 \end{itemize}
 These terms are not officially defined by the BLE specification but are used throughout this thesis. 
 
@@ -30,13 +30,15 @@ These terms are not officially defined by the BLE specification but are used thr
     \label{fig:ble_stack}
 \end{figure}
 
-As seen in Figure \ref{fig:ble_stack}, the BLE stack is divided into many layers with increasing levels of abstraction. The bottom-most layers, the Physical Layer (PHY) and Link Layer (LL) form the controller, which is responsible for controlling the connection. The top-most layers, the Generic Access Profile (GAP), Security Manager (SM), Generic Attribute Protocol (GAP), and Attribute Protocol (GATT), provide higher level functionality and APIs which, together with the Logical Link Control and Adaption Protocol (L2CAP) form the host.
+As seen in Figure \ref{fig:ble_stack}, the BLE stack is divided into many layers with increasing levels of abstraction. The bottom-most layers, the Physical Layer (PHY) and Link Layer (LL), form the controller, which is responsible for controlling the connection. The top-most layers, the Generic Access Profile (GAP), Security Manager (SM), Generic Attribute Protocol (GAP), and Attribute Protocol (GATT), provide higher level functionality and APIs which, together with the Logical Link Control and Adaption Protocol (L2CAP) form the host.
 
-The separation of the host and controller is derived from how Bluetooth BR/EDR is implemented, where the host and controller can be implemented separately or even exist on different chips entirely. The host and controller are connected together using a Host-Controller Interface. This separation also allows a single radio to be used with a BR/EDR and BLE controller simultaneously and a generic host to support both versions of Bluetooth.
+The separation of the host and controller is derived from how Bluetooth BR/EDR is implemented, where the host and controller can be implemented separately or even exist on different chips entirely. The host and controller are connected together using a Host-Controller Interface. This separation also allows a single radio to be used simultaneously with a BR/EDR and BLE controller and a generic host to support both versions of Bluetooth.
 
 Nordic Semiconductors supplies the SoftDevice for its microcontrollers, which contains the host and controller in a single qualified, pre-compiled binary \cite{nordic_softdevices}. The Zephyr framework can interface with Nordic's SoftDevice Controller through HCI or, since version 3.0.0, supports its own custom Zephyr BLE Controller. Packetcraft implements the entire stack from application to PHY.
 
-\subsection{Physical Layer} The PHY operates at the unlicensed 2.4GHz ISM (industrial, scientific, and medical) band and uses Gaussian frequency-shift keying (GFSK) modulation with adaptive frequency-hopping to reduce collisions. The 2.4GHz band is divided into 40 channels from 2.4000GHz to 2.4835GHz. The radio calculates the next hop using the formula:
+\subsection{Physical Layer}
+\label{sec:phy_layer}
+The PHY operates at the unlicensed 2.4GHz ISM (industrial, scientific, and medical) band and uses Gaussian frequency-shift keying (GFSK) modulation with adaptive frequency-hopping to reduce collisions. The 2.4GHz band is divided into 40 channels from 2.4000GHz to 2.4835GHz. The radio calculates the next hop using the formula:
 
 \[\text{channel}_{\text{new}} = (\text{channel}_{\text{current}} + \text{hop}) \text{ modulo } 37\]
     
@@ -45,14 +47,14 @@ where the value \textit{hop} is exchanged when the connection is established.
 BLE has a theoretical maximum throughput of 1Mbps for version 4.2 and 2Mbps for version 5.0. However, in practice, this lies much lower. In normal operation (uncoded), every bit is represented by one symbol. From version 5.0 onwards, BLE supports \textit{Coded PHY} where a single bit is represented by 2 to 8 symbols for improved range but reduced throughput.
 
 \subsection{Link Layer} 
-The link layer (LL) directly controls the PHY and manages the link state. The link layer is the only hard real-time layer of the BLE stack and is partly hardware dependent. For this reason, it is usually implemented and kept separate from the rest of the stack. However, Zephyr goes even further and splits the link layer up into an upper and a lower link layer (ULL and LLL respectively), where the ULL is hardware agnostic and generic, and the LLL is hardware specific.
+The link layer (LL) directly controls the PHY and manages the link state. The link layer is the only hard real-time layer of the BLE stack and is partly hardware dependent. For this reason, it is usually implemented and kept separate from the rest of the stack. However, Zephyr goes even further and splits the link layer into an upper, and a lower link layer (ULL and LLL, respectively), where the ULL is hardware agnostic and generic, and the LLL is hardware specific.
 
 \subsubsection{States and Roles}
 \begin{figure}[]
     \centering
     \includegraphics[width=0.8\textwidth,height=6cm,keepaspectratio=true]{images/ll_states/ll_states.drawio.png}
     \caption{
-        Link Layer state machine diagram. In the standby state no packets are received or transmitted. Advertisers send advertising packets without a connection, scanners receive advertising packets without the intention of connecting, and initiators initiate a connection with advertisers, which then become the centrals and peripherals, respectively.
+        Link Layer state machine diagram. In the standby state, no packets are received or transmitted. Advertisers send advertising packets without a connection, scanners receive advertising packets without the intention of connecting, and initiators initiate a connection with advertisers, which then become the centrals and peripherals, respectively.
     }
     \label{fig:ll_states}
 \end{figure}
@@ -144,11 +146,11 @@ Figure \ref{fig:adv_pdu} shows the content of a generic advertising channel PDU.
 \begin{figure}
     \begin{center}
         \begin{bytefield}[bitwidth=2em]{16}
-          \bitbox[]{1}{} \bitbox[]{4}{\textbf{Payload}} \\
+          \bitbox[]{1}{} \bitbox[]{16}{\textbf{Payload} for \texttt{ADV\_IND}, \texttt{ADV\_DIRECT\_IND}, \texttt{ADV\_NONCONN\_IND}, and  \texttt{ADV\_SCAN\_IND} PDUs} \\
           \bitbox[]{1}{\textbf{a}}\bitbox{4}{AdvA} \bitbox{12}{AdvData} \\
           \bitbox[]{1}{} \textlabel{4}{6 bytes} \textlabel{12}{0-31 bytes} \\ [-1ex]
 
-          \bitbox[]{1}{} \bitbox[]{4}{\textbf{AdvData}} \\
+          \bitbox[]{1}{} \bitbox[]{3}{\textbf{AdvData}} \\
           \bitbox[]{1}{\textbf{b}} \bitbox{4}{AD Structure 1} \bitbox{4}{\ldots} \bitbox{4}{AD Structure $N$} \\ [1.4ex]
 
           \bitbox[]{1}{}\bitbox[]{4}{\textbf{AD Structure}} \\
@@ -156,53 +158,106 @@ Figure \ref{fig:adv_pdu} shows the content of a generic advertising channel PDU.
           \bitbox[]{1}{}\textlabel{2}{1 byte} \textlabel{2}{1 byte} \textlabel{5}{Length - 1 bytes}
         \end{bytefield}
     \end{center}
-    \caption{a) Advertising channel PDU payload for advertising types of Table \ref{tbl:adv_types}. b) AdvData can contain as many AD Structures as fits in 31 bytes. c) The AD Structure starts with the length of the AD Type and AD Data fields combined, followed by the AD Type, and finally, the AD Data as defined in the specification for that AD Type.}
+    \caption{a) Advertising channel PDU payload for advertising types of Table \ref{tbl:adv_types}. b) AdvData can contain as many AD Structures (contained pieces of advertisement data) as fits in 31 bytes. c) The AD Structure starts with the length of the AD Type (type of advertisement data as defined as defined in the Core Specification Supplement \cite{bluetooth_supplement}) and AD Data fields combined, followed by the AD Type, and finally, the AD Data as defined in the specification for that AD Type.}
     \label{fig:adv_payload}
 \end{figure}
 
-The payload for the four advertising channel PDU types defined in Table \ref{tbl:adv_types} is shown in Figure \ref{fig:adv_payload}a. As seen in Figure \ref{fig:adv_payload}b, \textit{AdvData} can contain any number of \textit{AD Structures}. The AD Structure's \texttt{AD Type} field is an 8-bit identifier that refers to one of the many predefined advertisement datatypes. This is followed by the length of the data for this type and then the actual data. 
+\begin{figure}
+    \begin{center}
+        \begin{bytefield}[bitwidth=1.5em]{12}
+          \bitbox[]{8}{\textbf{Payload} for \texttt{SCAN\_REQ} PDU} \\
+          \bitbox{6}{AdvA} \bitbox{6}{AdvData} \\
+          \textlabel{6}{6 bytes} \textlabel{6}{6 bytes}
+        \end{bytefield}
+    \end{center}
+    \caption{The Payload field of a \textit{Scan Request} or \texttt{SCAN\_REQ} PDU consists of ScanA and AdvA fields. The ScanA field contains the address of the scanner, and the AdvA field contains the address of the scanner.}
+    \label{fig:scan_req_payload}
+\end{figure}
 
-Some examples of AD Types include \textit{Local Name}, \textit{TX Power Level}, and \textit{Appearance}. The \textit{Local Name} type allows the device to share its locally assigned device name. For example, one might name its headphones ``John's oPods'', which scanners can display to the user. The \textit{TX Power Level} type can be used to calculate a rough distance estimation between the advertiser and the scanner, and the \textit{appearance} type can tell scanners the general appearance of the advertiser (smart watch, for example).
+The payload for the four advertising channel PDU types defined in Table \ref{tbl:adv_types} is shown in Figure \ref{fig:adv_payload}a. As seen in Figure \ref{fig:adv_payload}b, \textit{AdvData} can contain any number of \textit{AD Structures}. The AD Structure's \texttt{AD Type} field is an 8-bit identifier that refers to one of the many predefined advertisement datatypes. This is followed by the length of the data for this type and then the actual data. The payload of the scan request is shown in Figure \ref{fig:scan_req_payload}. The payload contains a \textit{ScanA} and \textit{AdvA} field, which contain the address of the scanner and advertiser, respectively. The payload of the \textit{Scan Response} or \texttt{SCAN\_RSP} PDU is the same as the advertising channel PDUs in Figure \ref{fig:adv_payload}.
+
+Some examples of AD Types include \textit{Local Name}, \textit{TX Power Level}, and \textit{Appearance}. The \textit{Local Name} type allows the device to share its locally assigned device name. For example, one might name its headphones ``John's oPods'', which scanners can display to the user to identify the device. The \textit{TX Power Level} type can be used to calculate a rough distance estimation between the advertiser and the scanner, and the \textit{appearance} type can tell scanners the general appearance of the advertiser (smartwatch, for example).
 
 \subsubsection{Connection Setup and Parameters}
-The connection setup is initiated by the Central by responding with a \texttt{CONNECT\_IND} packet to an advertisement packet. From this moment, a connection between the devices is made, and the setup can begin. The parameters which decide the connection configuration are contained within the \texttt{CONNECT\_IND} packet (\texttt{LLData} field). The most important configuration values to understand are \textit{Connection Interval} (CI) and \textit{Peripheral Latency} (PL). 
+The connection setup is initiated by the central by responding to an advertising channel PDU (for example, \texttt{ADV\_IND}) from an advertiser with a \textit{Connection Request} or \texttt{CONNECT\_IND} PDU. From this moment, a connection between the devices is made, and the setup can begin. If the central receives no empty PDU back as an acknowledgment of the connection request, then the central will retry for a specific (user-defined) number of attempts.
+
+\newcommand{\bitboxsmalltext}[2]{%
+    \bitbox{#1}{\fontsize{5}{5}\selectfont#2}%
+}
+
+\begin{figure}
+    \begin{center}
+        \begin{bytefield}[bitwidth=3em]{11}
+          \bitbox[]{1}{} \bitbox[]{4}{\textbf{Payload} for \texttt{CONNECT\_IND} PDU} \\
+          \bitbox[]{1}{\textbf{a}} \bitbox{2}{InitA} \bitbox{2}{AdvA} \bitbox{2}{LLData} \\
+          \bitbox[]{1}{} \textlabel{2}{6 bytes} \textlabel{2}{6 bytes} \textlabel{2}{6 bytes} \\ [-1ex]
+
+          \bitbox[]{1}{} \bitbox[]{3}{\textbf{LLData}} \\
+          \bitbox[]{1}{\textbf{b}} 
+          \bitbox{1}{AA}
+          \bitboxsmalltext{1}{CRCInit}
+          \bitboxsmalltext{1}{WinSize}
+          \bitboxsmalltext{1}{WinOffset}
+          \bitboxsmalltext{1}{Interval}
+          \bitboxsmalltext{1}{Latency}
+          \bitboxsmalltext{1}{Timeout}
+          \bitbox{1}{ChM}
+          \bitbox{1}{Hop}
+          \bitbox{1}{SCA} \\
+          \bitbox[]{5}{}
+          \bitbox[t]{3}{$\underbrace{\hspace{10em}}_{\text{Connection parameters}}$}
+        \end{bytefield}
+    \end{center}
+    \caption{a) The payload consists of an InitA, AdvA, and LLData field, which contain the address of the initiator and advertiser, and the link layer configuration, respectively. b) The content of the LLData field in \textbf{a}, containing link layer configuration parameters (like the \textit{connection parameters}, for example).}
+    \label{fig:conn_ind_payload}
+\end{figure}
+
+Figure \ref{fig:conn_ind_payload}a shows the payload of the \texttt{CONNECT\_IND}. The payload consists of an InitA, AdvA, and LLData field, which contain the address of the initiator and advertiser, and the link layer configuration, respectively. As can be seen in Figure \ref{fig:conn_ind_payload}b, the LLData field can be further split up into the following ten fields:
+\begin{itemize}
+    \item \textbf{AA}: Contains the Access Address, which is the identifying address of the link used by both devices.
+    \item \textbf{CRCInit}: Contains the initialization value for the \textit{cyclic redundancy check} (CRC), which is an algorithm that can be used to check if a piece of data has been corrupted.
+    \item \textbf{WinSize}: Contains the transmission window size in units of 1.25ms. Used to allow the central to schedule transmission events for multiple peripherals efficiently.
+    \item \textbf{WinOffset}: Contains the transmission window offset in units of 1.25ms. Used to allow the central to schedule transmission events for multiple peripherals efficiently.
+    \item \textbf{Interval}: Contains the \textit{connection interval} in units of 1.25ms.
+    \item \textbf{Latency}: Contains the \textit{peripheral latency}, which is unitless.
+    \item \textbf{Timeout}: Contains the \textit{supervision timeout} in units of 10ms.
+    \item \textbf{ChMap}: Contains a bitmask where each bit represents a \textit{used} (1) and \textit{unused} (0) channels.
+    \item \textbf{Hop}: Contains the \textit{hop} value used in the formula examplained in Section \ref{sec:phy_layer}.
+    \item \textbf{SCA}: Contains the worst-case \textit{sleep clock accuracy} of the central. The SCA determines how much slack should be accounted for when waking up for the next transmission event.
+\end{itemize}
 
 \begin{figure}[]
     \centering
-    \includegraphics[width=0.8\textwidth,height=6cm,keepaspectratio=true]{images/connection_interval_slave_latency}
+    \includegraphics[width=0.8\textwidth,height=6cm,keepaspectratio=true]{images/conn_params/conn_params.drawio.png}
     \caption{
-        An example timeline of communications between a \color{red} Peripheral \color{black} and \color{blue} Central \color{black}. At every connection interval, a new chain of transmission events can start. This chain can theoretically continue up until the end of the connection interval. If the Peripheral Latency is set to $N$, it allows the Peripheral to skip responding to $N$ connection interval events from the Central to conserve energy. This can be seen in the third spike \cite{nordic_2022}.
+        Example of a timeline between a central and peripheral with CI=1s and PL=1. The CE at 1 second shows a normal connection event with one packet from the central and one response from the peripheral. The CE at 2 seconds shows how multiple transmissions can be changed during a single event. Finally, the CE at 3 seconds shows the peripheral using its PL of 1 to sleep during an event.
     }
     \label{fig:ci_and_pl}
 \end{figure}
 
-As you can see in Figure \ref{fig:ci_and_pl}, the Connection Interval is the time between the start of chains of transmit (TX) and receive (RX) events. Multiple TX/RX events can happen within one chain, but when there is no more data to be sent then the current chain is over, and new data can be transmitted at the following interval. Peripheral Latency defines how many Connection Intervals the Peripheral is allowed to skip. For example, take a CI of 2 seconds and a PL of 0. This means that every two seconds, the Central transmits a packet and the Peripheral replies. Now take a CI of 2 and a PL of 1. In this case, the Central transmits every two seconds, but the Peripheral is allowed to sleep every other packet, effectively making the time between transmissions four seconds. 
-
+The most important parameters for the connection timing are \textit{connection interval} (CI), \textit{peripheral latency} (PL), and \textit{Supervision Timeout} (ST). The connection interval defines the time between periodic \textit{connection events} (CE). A connection event starts with a packet transmission from the central. Every packet from the central has to be followed by a packet from the peripheral. Multiple transmissions can be chained together in a single connection event. The peripheral latency defines how many connection events can be skipped by the peripheral to conserve energy. If a valid packet has not been received for more time than the supervision timeout defines, then a connection is considered broken. For example, take a CI of 1 second and a PL of 0. In that case, the central transmits a packet every second, and the peripheral responds. Now take a CI of 1 and a PL of 1. In this case, the central transmits every second, but the peripheral is allowed to sleep every other packet, effectively making the time between transmissions two seconds. The second example is displayed in Figure \ref{fig:ci_and_pl}. The units and ranges for the three connection parameters are defined in Table \ref{tbl:conn_params}.
 
 \begin{table}
     \begin{center}
-    \begin{tabular}{|l|l|}
+    \begin{tabular}{|l|l|l|l|}
         \hline
-        \textbf{Parameter} & \textbf{Constraints} \\
+         & \textbf{Range} & \textbf{Unit} & \textbf{Real Range} \\
         \hline
-        Connection Interval & Range: 0x0006 0x0C80 \\
-                            & $Time = N * 1.25ms$ \\
-                            & Time Range: 7.5ms to 4000ms \\
+        CI          & 0x0006 to 0x0C80 (hexadecimal) & 1.25ms &  7.5ms to 4000ms  \\
+                    & 6 to 3200 (integer) & & \\
         \hline
-        Peripheral Latency  & Range: 0x0000 to 0x01F3 \\
+        PL          & 0x0000 to 0x01F3 (hexadecimal) & N/A & N/A \\
+                    & 0 to 499 (integer) & & \\
         \hline
-        Supervision Timeout & Range: 0x000A to 0x0C80 \\
-                            & $Time = N * 10ms$ \\
-                            & Time Range: 100ms to 32s \\
-                            & $Timeout \leq (Latency + 1) * Interval$ \\
+        ST          & 0x000A to 0x0C80 (hexadecimal) & 10.00ms & 100ms to 32000ms \\
+                    & 10 to 3200 (integer) & & \\
         \hline
     \end{tabular}
     \end{center}
-    \caption{Connection parameters and parameter constraints.}
+    \caption{The three connection parameters which define the timing of connection events \cite{bluetooth_spec}. CI is the time in between connection events. PL defines how many connection events can be skipped by the peripheral. ST is the maximum time allowed since the last packet after which a connection is considered lost}
     \label{tbl:conn_params}
 \end{table}
 
-The units and ranges for the three connection parameters are defined in Table \ref{tbl:conn_params}.
 
 \subsubsection{Feature Expansion and Compliance}
 Newer revisions of BLE can add new features to the link layer, adding new functionality or improving throughput. A vendor can also choose not to implement functionality not required for their application to reduce complexity. The supported features are stored in a 64-bit bitmask. The bitmask needs to be exchanged at the beginning of the connection to make sure a controller on one side does not use a procedure that the other controller does not support. Some examples of these features include \textit{LE Encryption} (bit 0), \textit{LE Data Packet Length Extension} (bit 5), \textit{LE 2MB PHY} (bit 11), and \textit{LE Coded PHY} (bit 11), which might sound familiar\cite[p. 2827]{bluetooth_spec}.

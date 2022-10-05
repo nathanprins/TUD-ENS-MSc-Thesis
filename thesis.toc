@@ -7,34 +7,34 @@
 \contentsline {subsection}{\numberline {2.2.1}Physical Layer}{7}{subsection.2.2.1}%
 \contentsline {subsection}{\numberline {2.2.2}Link Layer}{7}{subsection.2.2.2}%
 \contentsline {subsubsection}{States and Roles}{7}{section*.6}%
-\contentsline {subsubsection}{Advertising and Scanning}{9}{section*.8}%
-\contentsline {subsubsection}{Connection Setup and Parameters}{11}{section*.13}%
-\contentsline {subsubsection}{Feature Expansion and Compliance}{11}{section*.16}%
-\contentsline {subsection}{\numberline {2.2.3}Host Controller Interface}{12}{subsection.2.2.3}%
-\contentsline {subsection}{\numberline {2.2.4}Logical Link Control and Adaption Protocol}{12}{subsection.2.2.4}%
-\contentsline {subsection}{\numberline {2.2.5}Security Manager}{13}{subsection.2.2.5}%
-\contentsline {subsection}{\numberline {2.2.6}Generic Access Profile}{13}{subsection.2.2.6}%
-\contentsline {subsubsection}{Roles}{13}{section*.17}%
-\contentsline {subsection}{\numberline {2.2.7}Attribute Protocol and Generic Attribute Profile}{14}{subsection.2.2.7}%
-\contentsline {section}{\numberline {2.3}Connection Setup}{15}{section.2.3}%
-\contentsline {section}{\numberline {2.4}Operating Systems}{16}{section.2.4}%
-\contentsline {section}{\numberline {2.5}Demo Application}{16}{section.2.5}%
-\contentsline {chapter}{\numberline {3}Architecture}{17}{chapter.3}%
-\contentsline {section}{\numberline {3.1}Stage 1: Sharing Connection Parameters}{17}{section.3.1}%
-\contentsline {section}{\numberline {3.2}Reducing Connection Establishment Time}{19}{section.3.2}%
-\contentsline {subsection}{\numberline {3.2.1}Stage 2: Caching Service Discovery}{19}{subsection.3.2.1}%
-\contentsline {subsubsection}{Packetcraft}{20}{section*.22}%
-\contentsline {subsubsection}{Zephyr}{20}{section*.23}%
-\contentsline {subsection}{\numberline {3.2.2}Stage 3: Fast Reconnect}{21}{subsection.3.2.2}%
-\contentsline {subsubsection}{Packetcraft}{21}{section*.24}%
+\contentsline {subsubsection}{Advertising and Scanning}{8}{section*.8}%
+\contentsline {subsubsection}{Connection Setup and Parameters}{11}{section*.14}%
+\contentsline {subsubsection}{Feature Expansion and Compliance}{13}{section*.18}%
+\contentsline {subsection}{\numberline {2.2.3}Host Controller Interface}{13}{subsection.2.2.3}%
+\contentsline {subsection}{\numberline {2.2.4}Logical Link Control and Adaption Protocol}{14}{subsection.2.2.4}%
+\contentsline {subsection}{\numberline {2.2.5}Security Manager}{14}{subsection.2.2.5}%
+\contentsline {subsection}{\numberline {2.2.6}Generic Access Profile}{14}{subsection.2.2.6}%
+\contentsline {subsubsection}{Roles}{14}{section*.19}%
+\contentsline {subsection}{\numberline {2.2.7}Attribute Protocol and Generic Attribute Profile}{15}{subsection.2.2.7}%
+\contentsline {section}{\numberline {2.3}Connection Setup}{17}{section.2.3}%
+\contentsline {section}{\numberline {2.4}Operating Systems}{17}{section.2.4}%
+\contentsline {section}{\numberline {2.5}Demo Application}{17}{section.2.5}%
+\contentsline {chapter}{\numberline {3}Architecture}{19}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Stage 1: Sharing Connection Parameters}{19}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Reducing Connection Establishment Time}{21}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Stage 2: Caching Service Discovery}{21}{subsection.3.2.1}%
+\contentsline {subsubsection}{Packetcraft}{22}{section*.24}%
 \contentsline {subsubsection}{Zephyr}{22}{section*.25}%
-\contentsline {subsection}{\numberline {3.2.3}Stage 4: Caching Link Layer Exchanges}{22}{subsection.3.2.3}%
-\contentsline {subsubsection}{Packetcraft and Zephyr}{23}{section*.27}%
-\contentsline {section}{\numberline {3.3}Faster Connection Parameter Adaption}{23}{section.3.3}%
-\contentsline {subsection}{\numberline {3.3.1}Backronym For Algorithm Here}{24}{subsection.3.3.1}%
-\contentsline {chapter}{\numberline {4}Evaluation}{27}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Setup}{27}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Results}{27}{section.4.2}%
-\contentsline {chapter}{\numberline {5}Conclusions}{31}{chapter.5}%
-\contentsline {chapter}{\numberline {6}Future Work}{33}{chapter.6}%
-\contentsline {chapter}{\numberline {A}APPENDIX TITLE}{37}{appendix.A}%
+\contentsline {subsection}{\numberline {3.2.2}Stage 3: Fast Reconnect}{23}{subsection.3.2.2}%
+\contentsline {subsubsection}{Packetcraft}{23}{section*.26}%
+\contentsline {subsubsection}{Zephyr}{24}{section*.27}%
+\contentsline {subsection}{\numberline {3.2.3}Stage 4: Caching Link Layer Exchanges}{24}{subsection.3.2.3}%
+\contentsline {subsubsection}{Packetcraft and Zephyr}{25}{section*.29}%
+\contentsline {section}{\numberline {3.3}Faster Connection Parameter Adaption}{25}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}Backronym For Algorithm Here}{26}{subsection.3.3.1}%
+\contentsline {chapter}{\numberline {4}Evaluation}{29}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Setup}{29}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Results}{29}{section.4.2}%
+\contentsline {chapter}{\numberline {5}Conclusions}{33}{chapter.5}%
+\contentsline {chapter}{\numberline {6}Future Work}{35}{chapter.6}%
+\contentsline {chapter}{\numberline {A}APPENDIX TITLE}{39}{appendix.A}%

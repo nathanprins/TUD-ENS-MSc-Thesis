@@ -29,6 +29,14 @@
   2021.
 \newblock Last accessed: September 1st, 2022.
 
+\bibitem{bluetooth_supplement}
+{Bluetooth SIG}.
+\newblock Core specification supplement 5.3.
+\newblock
+  \url{https://www.bluetooth.com/specifications/specs/core-specification-supplement-10/},
+  2021.
+\newblock Last accessed: October 5th, 2022.
+
 \bibitem{colin_2018}
 Alexei Colin, Emily Ruppel, and Brandon Lucia.
 \newblock A reconfigurable energy storage architecture for energy-harvesting
