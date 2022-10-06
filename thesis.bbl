@@ -9,18 +9,6 @@
   2021.
 \newblock Last accessed: August 31st, 2022.
 
-\bibitem{bluetooth_market_update_2022}
-{Bluetooth SIG}.
-\newblock Ti documentation for the ble protocol stack.
-
-\bibitem{bluetooth_sig_name}
-{Bluetooth SIG}.
-\newblock Ti documentation for the ble protocol stack.
-
-\bibitem{bluetooth_sig_us}
-{Bluetooth SIG}.
-\newblock Ti documentation for the ble protocol stack.
-
 \bibitem{bluetooth_spec}
 {Bluetooth SIG}.
 \newblock Core specification 5.3.
@@ -98,11 +86,23 @@ Josiah Hester and Jacob Sorber.
   2022.
 \newblock Last accessed: September 1st, 2022.
 
+\bibitem{packetcraft}
+{Packetcraft, Inc.}
+\newblock Packetcraft website.
+
+\bibitem{panasonic_solar}
+Panasonic.
+\newblock Panasonic am-1454ca datasheet.
+
 \bibitem{wisp_2005}
 M.~Philipose, J.R. Smith, B.~Jiang, A.~Mamishev, Sumit Roy, and
   K.~Sundara-Rajan.
 \newblock Battery-free wireless identification and sensing.
 \newblock {\em IEEE Pervasive Computing}, 4(1):37--45, 2005.
+
+\bibitem{saleae_logic_pro_8}
+{Saleae}.
+\newblock Saleae logic pro 8 usb logic analyzer.
 
 \bibitem{satya_2019}
 Mahadev Satyanarayanan, Wei Gao, and Brandon Lucia.
@@ -111,9 +111,32 @@ Mahadev Satyanarayanan, Wei Gao, and Brandon Lucia.
   Computing Systems and Applications}, HotMobile '19, page 45–50, New York,
   NY, USA, 2019. Association for Computing Machinery.
 
+\bibitem{nordic_nrf52840dk}
+Nordic Semiconductor.
+\newblock nrf52840 dk product page.
+
+\bibitem{bluetooth_market_update_2022}
+Bluetooth SIG.
+\newblock 2022 market update.
+\newblock \url{https://www.bluetooth.com/2022-market-update/}.
+
+\bibitem{bluetooth_sig_us}
+Bluetooth SIG.
+\newblock About us.
+\newblock \url{https://www.bluetooth.com/about-us/}.
+
+\bibitem{bluetooth_sig_name}
+Bluetooth SIG.
+\newblock Origin of the name bluetooth.
+\newblock \url{https://www.bluetooth.com/about-us/bluetooth-origin/}.
+
 \bibitem{ti_ble_dev_guide}
 {Texas Instruments}.
 \newblock Ti documentation for the ble protocol stack.
+
+\bibitem{zephyrproject}
+{The Linux Foundation Projects}.
+\newblock Zephyr project, Sep 2022.
 
 \bibitem{townsend_cufi}
 Kevin Townsend, Cufi Carles, Akiba, and Robert Davidson.

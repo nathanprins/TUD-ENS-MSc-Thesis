@@ -1,7 +1,32 @@
 \chapter{Architecture}
 \label{chp:chapter_3}
+The improvements have been divided into four stages, where every successive stage contains the new improvement as well as the improvements of the previous stage. This is because some improvements build on top of changes from the previous stage and cannot exist independently. Consequently, the order of these stages also corresponds to the order in which the improvements have been implemented. For reference, these stages are: 
+\begin{table}[h]
+    \begin{center}
+    \begin{tabular}{|l|l|l|l|l|}
+        \hline
+                                     & \multicolumn{4}{c|}{\textbf{Stage}}   \\
+        \textbf{Improvement}         & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} \\
+        \hline
+        Connection Parameter Sharing & \textbf{Yes}        & \textbf{Yes}        & \textbf{Yes}        & \textbf{Yes} \\
+        \hline
+        Service Discovery Cache      & No         & \textbf{Yes}        & \textbf{Yes}        & \textbf{Yes} \\
+        \hline
+        Fast Reconnect               & No         & No         & \textbf{Yes}        & \textbf{Yes} \\
+        \hline
+        Skip Reconfiguration         & No         & No         & \textbf{Yes}        & \textbf{Yes} \\
+        \hline
+        Feature Exchange Cache       & No         & No         & No         & \textbf{Yes} \\
+        \hline
+        Data Length Extension Cache  & No         & No         & No         & \textbf{Yes} \\
+        \hline
+    \end{tabular}
+    \end{center}
+    \caption{Four stages of optimization.}
+    \label{tbl:opt_stages}
+\end{table}
 
-\section{Stage 1: Sharing Connection Parameters}
+\section{Stage 1: Connection Parameter Sharing}
 \label{sec:ch_3_sharing_params}
 This first solution will address improvement 1 mentioned in Section \ref{sec:introduction_problem_statement}. Unfortunately, there is no standard procedure for providing control to the Peripheral when deciding the initial connection parameters. The GAP service does provide a characteristic definition called the Peripheral Preferred Connection Parameters (PPCP). The data contained in the PPCP characteristic is shown in Table \ref{tbl:ppcp_format}. However, this can only be read once the connection has already been established \cite[p.~1361]{bluetooth_spec}. 
 

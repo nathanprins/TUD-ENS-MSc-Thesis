@@ -29,44 +29,47 @@ Reallocating 'name_of_file' (item size: 1) to 31 items.
 Reallocating 'name_of_file' (item size: 1) to 24 items.
 A level-1 auxiliary file: chapters/appendix_a.aux
 Database file #1: ./bib/MyMScTUDENSThesisBibFile.bib
-You've used 19 entries,
+Warning--I'm ignoring saleae_logic_pro_8's extra "author" field
+--line 411 of file ./bib/MyMScTUDENSThesisBibFile.bib
+You've used 24 entries,
             2118 wiz_defined-function locations,
-            598 strings with 7387 characters,
-and the built_in function-call counts, 5379 in all, are:
-= -- 517
-> -- 246
+            624 strings with 7938 characters,
+and the built_in function-call counts, 6383 in all, are:
+= -- 607
+> -- 281
 < -- 2
-+ -- 103
-- -- 80
-* -- 281
-:= -- 888
-add.period$ -- 61
-call.type$ -- 19
-change.case$ -- 96
++ -- 118
+- -- 90
+* -- 309
+:= -- 1053
+add.period$ -- 74
+call.type$ -- 24
+change.case$ -- 116
 chr.to.int$ -- 0
-cite$ -- 19
-duplicate$ -- 208
-empty$ -- 458
-format.name$ -- 80
-if$ -- 1165
+cite$ -- 24
+duplicate$ -- 243
+empty$ -- 568
+format.name$ -- 90
+if$ -- 1385
 int.to.chr$ -- 0
-int.to.str$ -- 19
+int.to.str$ -- 24
 missing$ -- 9
-newline$ -- 99
-num.names$ -- 38
-pop$ -- 140
+newline$ -- 122
+num.names$ -- 48
+pop$ -- 181
 preamble$ -- 1
-purify$ -- 78
+purify$ -- 93
 quote$ -- 0
-skip$ -- 187
+skip$ -- 229
 stack$ -- 0
-substring$ -- 188
-swap$ -- 53
+substring$ -- 213
+swap$ -- 58
 text.length$ -- 2
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 74
+type$ -- 94
 warning$ -- 0
-while$ -- 43
-width$ -- 21
-write$ -- 204
+while$ -- 53
+width$ -- 26
+write$ -- 246
+(There was 1 warning)
