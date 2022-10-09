@@ -31,12 +31,12 @@
 \contentsline {subsection}{\numberline {3.2.3}Stage 4: Caching Link Layer Exchanges}{25}{subsection.3.2.3}%
 \contentsline {subsubsection}{Packetcraft and Zephyr}{26}{section*.30}%
 \contentsline {section}{\numberline {3.3}Faster Connection Parameter Adaption}{26}{section.3.3}%
-\contentsline {subsection}{\numberline {3.3.1}Backronym For Algorithm Here}{27}{subsection.3.3.1}%
+\contentsline {subsection}{\numberline {3.3.1}FRAPPUCInO}{27}{subsection.3.3.1}%
 \contentsline {chapter}{\numberline {4}Evaluation}{31}{chapter.4}%
 \contentsline {section}{\numberline {4.1}Experimental Setup}{31}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Results}{34}{section.4.2}%
-\contentsline {subsection}{\numberline {4.2.1}Static}{34}{subsection.4.2.1}%
-\contentsline {subsection}{\numberline {4.2.2}Dynamic}{34}{subsection.4.2.2}%
-\contentsline {chapter}{\numberline {5}Conclusions}{35}{chapter.5}%
-\contentsline {chapter}{\numberline {6}Future Work}{37}{chapter.6}%
-\contentsline {chapter}{\numberline {A}APPENDIX TITLE}{41}{appendix.A}%
+\contentsline {section}{\numberline {4.2}Results}{32}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Static}{32}{subsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.2.2}Dynamic}{35}{subsection.4.2.2}%
+\contentsline {chapter}{\numberline {5}Conclusions}{37}{chapter.5}%
+\contentsline {chapter}{\numberline {6}Future Work}{39}{chapter.6}%
+\contentsline {chapter}{\numberline {A}APPENDIX TITLE}{43}{appendix.A}%

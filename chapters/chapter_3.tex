@@ -277,7 +277,7 @@ When FreeBie goes to sleep in between transmission events, it calls the \texttt{
 
 When the system resumes, the voltage level of the capacitor can be measured using the onboard Analog to Digital Converter (ADC), and the connection rate can be adjusted appropriately. 
 
-\subsection{Backronym For Algorithm Here}
+\subsection{FRAPPUCInO}
 Algorithm \ref{alg:conn_params_control_system} shows the pseudocode of the algorithm. As the name would suggest, \texttt{AdaptConnParamsToVdd} contains the logic for calculating the new connection parameters based on the capacitor voltage. 
 
 The parameter that is controlled by the system is $preset_{new}$ and is an integer that represents the power level. This integer has a value between $0$ and $N$ and for each value maps to a \textit{preset} within the \textit{preset list}. Each \textit{preset} contains the PPCP that corresponds to a certain connection speed and, as a result, power draw. All \texttt{presets} within the \textit{preset list} are ordered on expected power draw from lowest power draw ($0^{th}$ item) to highest power draw ($N^{th}$ item).
