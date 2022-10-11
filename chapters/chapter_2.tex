@@ -345,6 +345,17 @@ The FreeBie project was originally developed using the open-source BLE stack Pac
 
 However, since FreeBie was originally developed, Packetcraft has gone into closed-source development. For this reason, a newer RTOS was chosen for the central, called Zephyr. Zephyr OS is a modern RTOS developed by the Linux Foundation and is now the officially supported stack for Nordic Semiconductors \cite{zephyrproject}. A side-effect of implementing the proposed solutions on two platforms is proving that the approach used to solve the issues outlined in Section \ref{sec:introduction_problem_statement} is platform-agnostic.
 
-\section{Demo Application}
+\section{Demo System}
 \label{sec:demo_application}
-To be able to benchmark the improvements proposed in this thesis we need a demo application. The network topology will be a simple Central / Peripheral network with a single peripheral. See Figure \ref{}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1\textwidth,height=6cm,keepaspectratio=true]{images/demo_layout/demo_layout.drawio.png}
+    \caption{
+        The combination of central and peripheral on top is used for testing, while the combination on the bottom is used for development.
+    }
+    \label{fig:demo_layout}
+\end{figure}
+The modifications we aim to make to the system will attempt to remove certain procedures without losing their functionality. We have developed a demo system to verify that these functions still work. The demo system consists of a single central and peripheral, shown in Figure \ref{fig:demo_layout}. The configuration on top consisted of an nRF52840DK as a central and the FreeBie as a peripheral and was mostly used when verifying new code, when intermittency was required, or during the final testing phase and evaluation. The configuration on the bottom was primarily used during development since the FreeBie codebase runs on any nRF52840DK when intermittent operation is disabled. This configuration allows us to access the serial debug trace of Packetcraft. 
+
+We developed a Packetcraft application for FreeBie to act like a smartwatch peripheral and a Zephyr application for the central to work like a stand-in for a phone. Appendix \ref{app:appendix_a} contains a list of all available terminal commands, a list of all available services and characteristics, as well as a description of how to use the demo system and how it was developed. 

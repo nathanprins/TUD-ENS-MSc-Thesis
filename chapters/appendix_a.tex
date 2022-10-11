@@ -1,4 +1,440 @@
-\chapter{APPENDIX TITLE}
+\chapter{Demo System}
 \label{app:appendix_a}
+This appendix includes supplementary information on the features of the demo system, as well as a description of how it was implemented and developed.
 
-Appendix body.
+\section{Using the System}
+\subsection{Connecting and Powering the System}
+\label{sec:connecting_setup}
+Connecting and powering up the ``development'' configuration shown in Figure \ref{fig:demo_layout} is as simple as connecting both development boards to a computer using two micro USB to USB A cables. Be sure to check if all power switches are set to the ON position.
+
+Connecting and powering the ``testing'' configuration shown in Figure \ref{fig:demo_layout} is a bit more involved. The central is connected to the computer using a micro USB-to-USB A cable like in the development setup. Connect FreeBie to a Segger JLink debug probe using a 5-pin debug cable. Attach the debug probe to the computer using a USB B-to-USB A. Power the FreeBie using the Nordic Power Profiler Kit II (PPK2), by connecting the the \textit{Vout} and \textit{Gnd} on the PPK2 to the \textit{Vbat} and \textit{Gnd} on FreeBie. Finally, download and open the Power Profiler application and change the settings to \textit{Volt Meter} and \textit{2660mV}.
+
+\subsection{Using the Terminal}
+\label{sec:using_terminal}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|p{6cm}|}
+    \hline
+    \textbf{Command}  & \textbf{Help} \\
+    \hline 
+    \texttt{ble list show} & Show all discovered devices. \\ \hline
+    \texttt{ble list find <local name>}  & Find device by name. \\ \hline
+    \texttt{ble connect <index>} & Connect to a device using its index in the device list. \\ \hline
+    \texttt{ble disconnect} & Terminate the current connection using the \textit{Remote User Terminated Connection} reason. \\ \hline
+    \texttt{ble conn reconnect} & Terminate the current connection using the \textit{Fast Reconnect} reason. \\ \hline
+    \texttt{ble cache delete <name>} & Delete the cached data and hash of an entry by name (e.g. "handles"). \\ \hline
+    \texttt{ble cache scramble <name>} & Scramble the cached hash of an entry by name (e.g. "handles").  \\ \hline
+    \texttt{ble cts notify} & Trigger a notification for the Current Time characteristic of the Central Time Service. \\ \hline
+    \texttt{ble test read} & Perform a large read request ($\geq 27$ bytes) on the Test characteristic of the Test service. Used to validate \textit{LE Data Length Extension} caching. \\ \hline
+    \texttt{ble test write} & Perform a large write request ($\geq 27$ bytes) on the Test characteristic of the Test service. Used to validate \textit{LE Data Length Extension} caching. \\ \hline
+    \end{tabular}
+    \caption{Terminal commands available on the central.}
+    \label{tbl:demo_commands}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|p{6cm}|}
+    \hline
+    \textbf{Command}  & \textbf{Help} \\
+    \hline 
+    \texttt{disconnect <id> [--fast]} & Terminate a connection by id (usually 1) using the \textit{Remote User Terminated Connection} reason (or \textit{Fast Reconnect} when the "--fast" flag is added). \\ \hline
+    \texttt{param\_update <preset index>} & Perform a parameter update to a predefined preset using \textit{Fast Reconnect}. \\ \hline
+    \end{tabular}
+    \caption{Terminal commands available on the peripheral}
+    \label{tbl:demo_commands_peripheral}
+\end{table}
+When the development boards are connected to the laptop, virtual COM ports are created on \texttt{/dev/ttyACM0}, \texttt{/dev/ttyACM1}, etc. A serial terminal application, such as \textit{PuTTY}, can be used to connect to the central and peripheral with a baud rate of 115200 bits per second. When connected, a \texttt{help} command can be entered to display the available commands.
+
+Table \ref{tbl:demo_commands} and Table \ref{tbl:demo_commands_peripheral} show commands that can be invoked on the central and peripheral, respectively. These commands are used to perform basic functions required for testing new code and specific procedures to validate caching methods.
+
+\subsection{Making a Connection}
+To perform a connection setup, use the following steps:
+\begin{enumerate}
+    \item Connect and power on the central and peripheral as described in Section \ref{sec:connecting_setup}.
+    \item Open a terminal session to the central using the method described in Section \ref{sec:using_terminal}.
+    \item Enter \texttt{ble list show} and look for the local name ``Watch'' or enter \texttt{ble list find Watch} if the list exceeds the terminal size.
+    \item Enter \texttt{ble connect <index>}, where \texttt{index} is the index of the device entry found in the previous step.
+\end{enumerate}
+
+\subsection{GATT Services and Characteristics}
+\label{sec:app_a_services}
+
+% Please add the following required packages to your document preamble:
+% \usepackage{multirow}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|l|}
+    \hline
+    \textbf{Service}      & \textbf{Characteristic}                    & \textbf{UUID} & \textbf{Perm.} \\ \hline
+    \multirow{4}{*}{GAP}  & Device Name                                & 0x2A00        & R              \\ \cline{2-4} 
+                          & Appearance                                 & 0x2A01        & R              \\ \cline{2-4} 
+                          & Central Address Resolution                 & 0x2AA6        & R              \\ \cline{2-4} 
+                          & PPCP                                       & 0x2AC9        & RW             \\ \hline
+    \multirow{4}{*}{GATT} & Service Changed                            & 0x2A05        & R              \\ \cline{2-4} 
+                          & Service Changed CCC                        &               & RW             \\ \cline{2-4} 
+                          & Client Supported Features                  & 0x2B29        & RW             \\ \cline{2-4} 
+                          & Database Hash                              & 0x2B2A        & R              \\ \hline
+    \multirow{2}{*}{CTS}  & Current Time                               & 0x2A2B        & RWN            \\ \cline{2-4} 
+                          & Current Time CCC                           &               & RW             \\ \hline
+    \multirow{5}{*}{Test} & Supported New Alert Category               & 0x2A47        & R              \\ \cline{2-4} 
+                          & New Alert                                  & 0x2A46        & N              \\ \cline{2-4} 
+                          & Supported Unread Alert Category            & 0x2A48        & R              \\ \cline{2-4} 
+                          & Unread Alert Status                        & 0x2A45        & N              \\ \cline{2-4} 
+                          & Alert Notification Control Point           & 0x2A44        & W              \\ \hline
+    \end{tabular}
+    \caption{Services that are available in the central application. Permissions have been abbreviated in the permissions (perm.) column to R for Read, W for Write, and N for Notification}
+    \label{tbl:services_central}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|l|}
+        \hline
+    \textbf{Service}         & \textbf{Characteristic}         & \textbf{UUID} & \textbf{Perm.}  \\ \hline
+    \multirow{4}{*}{GAP}     & Device Name                     & 0x2A00        & R               \\ \cline{2-4} 
+                             & Appearance                      & 0x2A01        & R               \\ \cline{2-4} 
+                             & Central Address Resolution      & 0x2AA6        & R               \\ \cline{2-4} 
+                             & Resolvable Private Address Only & 0x2AC9        & R               \\ \hline
+    \multirow{5}{*}{GATT}    & Service Changed                 & 0x2A05        & R               \\ \cline{2-4} 
+                             & Service Changed CCC             &               & RW              \\ \cline{2-4} 
+                             & Client Supported Features       & 0x2B29        & RW              \\ \cline{2-4} 
+                             & Database Hash                   & 0x2B2A        & R               \\ \cline{2-4} 
+                             & Server Supported Features       & 0x2B3A        & R               \\ \hline
+    \multirow{2}{*}{Battery} & Battery Level                   & 0x2A19        & R               \\ \cline{2-4} 
+                             & Battery Level CCC               &               & RW              \\ \hline
+    \multirow{2}{*}{Test}    & Text                            &               & RW              \\ \cline{2-4} 
+                             & Text CCC                        &               & RW              \\ \hline
+    \end{tabular}
+    \caption{Services that are available in the peripheral application. Permissions have been abbreviated in the permissions (perm.) column to R for Read, W for Write, and N for Notificatio}
+    \label{tbl:services_peripheral}
+\end{table}
+
+Table \ref{tbl:services_central} and Table \ref{tbl:services_peripheral} show the services and characteristics that were added to the central and peripheral applications, respectively. If a specific use is mentioned in the table, then it was explicitly added to validate our modifications. The remaining services and characteristics provide a more realistic workload when testing service discovery.
+
+\section{System Implementation}
+\subsection{Packetcraft}
+\subsubsection{Registering GATT Services with the ATT server}
+In this example, it is shown how to add a simple GATT service with a single characteristic that contains the string ``Lorem ipsum''. First, define three variables for the service declaration, characteristic declaration, and the characteristic value.
+\begin{lstlisting}
+/* Test service declaration */
+static const uint8_t testValSvc[] = {TEST_UUID_SERVICE};
+static const uint16_t testLenSvc = sizeof(testValSvc);
+
+/* Test text characteristic */
+static const uint8_t testValTxtCh[] = {ATT_PROP_READ | ATT_PROP_WRITE, UINT16_TO_BYTES(TEST_TXT_HDL), TEST_UUID_TEXT};
+static const uint16_t testLenTxtCh = sizeof(testValTxtCh);
+
+/* Test text value */
+static uint8_t testValTxt[TEST_TXT_LEN] = { 'L','o','r','e','m',' ','i','p','s','u','m', 0 };
+static const uint16_t testLenTxt = sizeof(testValTxt);
+\end{lstlisting} 
+These variables can be used to describe the ATT attributes that make up the GATT service.
+\begin{lstlisting}
+static const attsAttr_t testList[] =
+{
+    /* Service declaration */
+    {
+        attPrimSvcUuid,
+        (uint8_t *) testValSvc,
+        (uint16_t *) &testLenSvc,
+        sizeof(testValSvc),
+        0,
+        ATTS_PERMIT_READ
+    },
+    /* Characteristic declaration */
+    {
+        attChUuid,
+        (uint8_t *) testValTxtCh,
+        (uint16_t *) &testLenTxtCh,
+        sizeof(testValTxtCh),
+        0,
+        ATTS_PERMIT_READ
+    },
+    /* Characteristic value */
+    {
+        testTxtUuid,
+        testValTxt,
+        (uint16_t *) &testLenTxt,
+        sizeof(testValTxt),
+        (ATTS_SET_UUID_128 
+        | ATTS_SET_READ_CBACK 
+        | ATTS_SET_WRITE_CBACK),
+        (ATTS_PERMIT_READ | ATTS_PERMIT_WRITE)
+    },
+};
+\end{lstlisting} 
+Finally, the GATT service can be registered with the ATT server.
+\begin{lstlisting}
+/* Test group structure */
+static attsGroup_t svcTestGroup =
+    {
+        NULL,
+        (attsAttr_t *) testList,
+        NULL,
+        NULL,
+        TEST_START_HDL,
+        TEST_END_HDL
+    };
+    
+AttsAddGroup(&svcTestGroup);
+\end{lstlisting}
+
+\subsubsection{Supporting Notifications for a Client}
+To allow a GATT client to enable Notifications on a characteristic using its CCC descriptor, we need to register the CCCs with the ATT server. To do this we first define the CCC set.
+\begin{lstlisting}
+/*! enumeration of client characteristic configuration descriptors */
+enum
+{
+    APP_BATT_LVL_CCC_IDX,  /*! Battery Level */
+    APP_CCC_COUNT
+};
+
+/*! client characteristic configuration descriptors settings, indexed by above enumeration */
+static const attsCccSet_t appCccSet[APP_NUM_CCC_IDX] =
+{
+    /* APP_BATT_LVL_CCC_IDX */
+    {
+        BATT_LVL_CH_CCC_HDL,   // ccc handle
+        ATT_CLIENT_CFG_NOTIFY, // value range
+        DM_SEC_LEVEL_NONE      // required security level
+    }   
+};
+\end{lstlisting}
+The CCC set can then be registered with the ATT server.
+\begin{lstlisting}
+static void appCccCback(attsCccEvt_t *pEvt)
+{
+    /* Perform any necessary action to enable or disable notifications, like starting periodic timers. */
+}
+
+AttsCccRegister(APP_CCC_COUNT, (attsCccSet_t *) appCccSet, appCccCback);
+\end{lstlisting}
+
+\subsubsection{Service Discovery}
+To discover a single service, define a list of characteristics to discover. Afterward, perform a service discovery using the characteristic list and pass the function a pointer to the global handle list.
+\begin{lstlisting}
+uint16_t globalHandleList[2] = {};
+
+/* Characteristic 1 */
+static const attcDiscChar_t ch1 =
+{
+    Characteristic1Uuid, /* uuid */
+    ATTC_SET_UUID_128 /* optional characteristic settings */
+};
+
+/* Characteristic 1 */
+static const attcDiscChar_t ch2 =
+{
+    Characteristic2Uuid,
+    0
+};
+
+/*! List of characteristics to be discovered; order matches handle index enumeration  */
+static const attcDiscChar_t *charList[] =
+{
+    &ch1,
+    &ch2
+};
+
+AppDiscFindService(connId, 
+                    ATT_16_UUID_LEN, 
+                    (uint8_t *) ServiceUuid,
+                    GATT_HDL_LIST_LEN, 
+                    (attcDiscChar_t **) charList, 
+                    globalHandleList);
+\end{lstlisting}
+
+\subsubsection{Configuration of a Remote GATT Server}
+Configuration consists of initial reads from and writes to characteristics and enabling notifications for characteristics. However, since notifications are enabled by writing to the CCC descriptor of a characteristic, configuration is essentially only initial reads from and writes to characteristics. Packetcraft automates configuration by allowing us to define a list of characteristics to read from or write to automatically. For example, first define a list containing an initial read on the Central Time characteristic, as well as writing to the Central Time CCC descriptor to get updates of the Central Time in the future.
+\begin{lstlisting}
+/* Default value for CCC notifications */
+static const uint8_t watchCccNtfVal[] = {UINT16_TO_BYTES(ATT_CLIENT_CFG_NOTIFY)};
+
+/* List of characteristics to configure after service discovery */
+static const attcDiscCfg_t discoveryConfig[] =
+{
+  /* Read:  CTS Current time */
+  {NULL, 0, (TIPC_CTS_CT_HDL_IDX + WATCH_DISC_CTS_START)},
+
+  /* Write:  CTS Current time ccc descriptor */
+  {watchCccNtfVal, sizeof(watchCccNtfVal), (TIPC_CTS_CT_CCC_HDL_IDX + WATCH_DISC_CTS_START)},
+};
+
+AppDiscConfigure(connId, 
+                APP_DISC_CFG_START, 
+                WATCH_DISC_SLAVE_CFG_LIST_LEN,
+                (attcDiscCfg_t *) discoveryConfig,
+                WATCH_DISC_SLAVE_HDL_LIST_LEN, 
+                globalHandleList);
+\end{lstlisting}
+
+\subsubsection{Custom Discovery and Configuration Procedure}
+This example shows how to register a callback to customize Packetcrafts default discovery and configuration behavior.
+\begin{lstlisting}
+static void watchDiscCback(dmConnId_t connId, uint8_t status)
+{
+    switch(status)
+    {
+    case APP_DISC_INIT:
+        /* perform custom initialization */
+        /* For example: read the cache   */
+        break;
+    case APP_DISC_READ_DATABASE_HASH:
+        /* Read peer's database hash */
+        AppDiscReadDatabaseHash(connId);
+        break;
+    case APP_DISC_SEC_REQUIRED:
+        /* request security */
+        AppSlaveSecurityReq(connId);
+        break;
+    case APP_DISC_START:
+        /* discovery first service */
+        break;
+    case APP_DISC_FAILED:
+    case APP_DISC_CMPL:
+        /* perform custom completion */
+        /* For example: write the cache   */
+        /* start configuration */
+        AppDiscConfigure(...);
+        break;
+    case APP_DISC_CFG_START:
+        /* start configuration in case */
+        /* discovery is skipped */
+        AppDiscConfigure(...);
+        break;
+    case APP_DISC_CFG_CONN_START:
+        /* Configuration for connection setup started */
+        break;
+    case APP_DISC_CFG_CMPL:
+        AppDiscComplete(connId, status);
+        break;
+    default: break;
+    }
+}
+
+AppDiscRegister(watchDiscCback);
+\end{lstlisting}
+
+\subsection{Zephyr}
+\subsubsection{Registering GATT Services with the ATT server}
+This example shows how to add a simple GATT service with a single characteristic containing the string ``Lorem Ipsum''. 
+\begin{lstlisting}
+static uint8_t text_value[] = { 'L','o','r','e','m',' ','i','p','s','u','m', 0 };
+
+/* Service Declaration */
+BT_GATT_SERVICE_DEFINE(test_service,
+    BT_GATT_PRIMARY_SERVICE(TEST_SERVICE_UUID),
+    BT_GATT_CHARACTERISTIC(TEST_SERVICE_TEXT_UUID, 
+                            BT_GATT_CHRC_READ | BT_GATT_CHRC_WRITE,
+                            BT_GATT_PERM_READ | BT_GATT_PERM_WRITE,
+                            NULL, NULL, 
+                            text_value),
+);
+\end{lstlisting}
+
+\subsubsection{Supporting Notifications for Clients}
+The example in the previous section can easily be extended to support notifications.
+\begin{lstlisting}
+static void ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
+{
+    /* Perform any necessary action to enable or disable notifications, like starting periodic timers. */
+}
+
+/* Service Declaration */
+BT_GATT_SERVICE_DEFINE(test_service,
+    BT_GATT_PRIMARY_SERVICE(TEST_SERVICE_UUID),
+    BT_GATT_CHARACTERISTIC(TEST_SERVICE_TEXT_UUID, 
+                            BT_GATT_CHRC_READ | BT_GATT_CHRC_WRITE,
+                            BT_GATT_PERM_READ | BT_GATT_PERM_WRITE,
+                            NULL, NULL, 
+                            text_value),
+    BT_GATT_CCC(ccc_cfg_changed, BT_GATT_PERM_READ | BT_GATT_PERM_WRITE),
+);
+\end{lstlisting}
+
+\subsubsection{Service Discovery}
+The discovery of GATT service in Zephyr is a very manual, cumbersome process. To make this easier we developed a library called \textit{gatt\_disc}. This library allows us to easily automate the discovery of any service. As an example, we automate the discovery of the GAP service.
+
+\begin{lstlisting}
+#include "gatt_disc.h"
+
+/* automatic index enumeration */
+enum {
+  GAP_DEVICE_NAME_IDX,
+  GAP_APPEARANCE_IDX,
+  GAP_CAR_IDX,
+  GAP_LEN
+};
+
+gatt_disc_service_t gap_service = {
+    .name = "GAP",
+    .attrs_len = GAP_LEN,
+    .attrs = {
+        {
+            .name = "Device Name",
+            .type = BT_GATT_DISCOVER_CHARACTERISTIC,
+            .idx = GAP_DEVICE_NAME_IDX,
+        },
+        {
+            .name = "Appearance",
+            .type = BT_GATT_DISCOVER_CHARACTERISTIC,
+            .idx = GAP_APPEARANCE_IDX,
+        },
+        {
+            .name = "Central Address Resolution",
+            .type = BT_GATT_DISCOVER_CHARACTERISTIC,
+            .idx = GAP_CAR_IDX,
+        },
+    }
+};
+
+void gap_discover_service(struct bt_conn *conn, uint16_t *handles, gatt_disc_done_t done_func) {
+  gatt_disc_service_init(&gap_service, BT_UUID_TYPE_16, BT_UUID_GAP, (struct bt_uuid *[]){
+      BT_UUID_GAP_DEVICE_NAME,
+      BT_UUID_GAP_APPEARANCE,
+      BT_UUID_CENTRAL_ADDR_RES
+  }, GAP_LEN, handles);
+
+  gatt_disc_service(conn, &gap_service, done_func);
+}
+\end{lstlisting}
+
+We can then discover the service at any time using \texttt{gap\_discover\_service}.
+\begin{lstlisting}
+uint16_t handles[GAP_LEN] = {};
+
+void disc_done(struct bt_conn *conn, gatt_disc_service_t *service)
+{
+    /* discovery is done */
+}
+
+gap_discover_service(conn, handles, disc_done);
+\end{lstlisting}
+
+\subsubsection{Configuration of a Remote GATT Server}
+This example shows how we can enable notifications for a single characteristic.
+
+\begin{lstlisting}
+struct bt_gatt_subscribe_params subscribe_params;
+
+uint8_t notify_func(struct bt_conn *conn,
+                    struct bt_gatt_subscribe_params *params,
+                    const void *data, uint16_t length)
+{
+    /* notification received */
+}
+
+subscribe_params.value_handle = CHARACTERISTIC_HANDLE;
+subscribe_params.notify = notify_func;
+subscribe_params.value = BT_GATT_CCC_NOTIFY;
+subscribe_params.ccc_handle = CHARACTERISTIC_CCC_HANDLE;
+
+int err = bt_gatt_subscribe(conn, &subscribe_params);
+if (err && err != -EALREADY) {
+    /* subscription failed */
+} else {
+    /* subscribed */
+}
+\end{lstlisting}
+

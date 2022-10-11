@@ -54,6 +54,25 @@
 % Chose font style
 \usepackage[scaled=.92]{helvet}
 
+% C code environment
+\usepackage{listings}
+\usepackage{xcolor}
+\lstset { %
+    language=C,
+    backgroundcolor=\color{black!5}, % set backgroundcolor
+    basicstyle=\footnotesize,% basic font setting
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+}
+
 % for url's use "\url{http://www.google.com/}"
 \usepackage{url}
 \def\UrlBreaks{\do\/\do-}
@@ -66,6 +85,8 @@
 % Pseudocode
 \usepackage{algpseudocode}
 \usepackage{algorithm}
+
+\usepackage{multirow}
 
 % Information that will be filled in at various points in the report
 \newcommand{\reportTitle}{Optimizing Connection Establishment and Parameter Adaptation in Bluetooth Low-Energy for Intermittently-powered Devices}

@@ -18,18 +18,18 @@
 \contentsline {subsubsection}{Roles}{15}{section*.19}%
 \contentsline {subsection}{\numberline {2.3.7}Attribute Protocol and Generic Attribute Profile}{16}{subsection.2.3.7}%
 \contentsline {section}{\numberline {2.4}Operating Systems Used to Implement the System Proposed}{17}{section.2.4}%
-\contentsline {section}{\numberline {2.5}Demo Application}{18}{section.2.5}%
+\contentsline {section}{\numberline {2.5}Demo System}{18}{section.2.5}%
 \contentsline {chapter}{\numberline {3}Architecture}{19}{chapter.3}%
 \contentsline {section}{\numberline {3.1}Stage 1: Connection Parameter Sharing}{19}{section.3.1}%
 \contentsline {section}{\numberline {3.2}Reducing Connection Establishment Time}{20}{section.3.2}%
 \contentsline {subsection}{\numberline {3.2.1}Stage 2: Caching Service Discovery}{22}{subsection.3.2.1}%
-\contentsline {subsubsection}{Packetcraft}{22}{section*.25}%
-\contentsline {subsubsection}{Zephyr}{23}{section*.26}%
+\contentsline {subsubsection}{Packetcraft}{22}{section*.26}%
+\contentsline {subsubsection}{Zephyr}{23}{section*.27}%
 \contentsline {subsection}{\numberline {3.2.2}Stage 3: Fast Reconnect}{23}{subsection.3.2.2}%
-\contentsline {subsubsection}{Packetcraft}{24}{section*.27}%
-\contentsline {subsubsection}{Zephyr}{24}{section*.28}%
+\contentsline {subsubsection}{Packetcraft}{24}{section*.28}%
+\contentsline {subsubsection}{Zephyr}{24}{section*.29}%
 \contentsline {subsection}{\numberline {3.2.3}Stage 4: Caching Link Layer Exchanges}{25}{subsection.3.2.3}%
-\contentsline {subsubsection}{Packetcraft and Zephyr}{26}{section*.30}%
+\contentsline {subsubsection}{Packetcraft and Zephyr}{26}{section*.31}%
 \contentsline {section}{\numberline {3.3}Faster Connection Parameter Adaption}{26}{section.3.3}%
 \contentsline {subsection}{\numberline {3.3.1}FRAPPUCInO}{27}{subsection.3.3.1}%
 \contentsline {chapter}{\numberline {4}Evaluation}{31}{chapter.4}%
@@ -39,4 +39,21 @@
 \contentsline {subsection}{\numberline {4.2.2}Dynamic}{35}{subsection.4.2.2}%
 \contentsline {chapter}{\numberline {5}Conclusions}{37}{chapter.5}%
 \contentsline {chapter}{\numberline {6}Future Work}{39}{chapter.6}%
-\contentsline {chapter}{\numberline {A}APPENDIX TITLE}{43}{appendix.A}%
+\contentsline {chapter}{\numberline {A}Demo System}{43}{appendix.A}%
+\contentsline {section}{\numberline {A.1}Using the System}{43}{section.A.1}%
+\contentsline {subsection}{\numberline {A.1.1}Connecting and Powering the System}{43}{subsection.A.1.1}%
+\contentsline {subsection}{\numberline {A.1.2}Using the Terminal}{44}{subsection.A.1.2}%
+\contentsline {subsection}{\numberline {A.1.3}Making a Connection}{45}{subsection.A.1.3}%
+\contentsline {subsection}{\numberline {A.1.4}GATT Services and Characteristics}{45}{subsection.A.1.4}%
+\contentsline {section}{\numberline {A.2}System Implementation}{46}{section.A.2}%
+\contentsline {subsection}{\numberline {A.2.1}Packetcraft}{46}{subsection.A.2.1}%
+\contentsline {subsubsection}{Registering GATT Services with the ATT server}{46}{section*.47}%
+\contentsline {subsubsection}{Supporting Notifications for a Client}{47}{section*.48}%
+\contentsline {subsubsection}{Service Discovery}{48}{section*.49}%
+\contentsline {subsubsection}{Configuration of a Remote GATT Server}{49}{section*.50}%
+\contentsline {subsubsection}{Custom Discovery and Configuration Procedure}{49}{section*.51}%
+\contentsline {subsection}{\numberline {A.2.2}Zephyr}{50}{subsection.A.2.2}%
+\contentsline {subsubsection}{Registering GATT Services with the ATT server}{50}{section*.52}%
+\contentsline {subsubsection}{Supporting Notifications for Clients}{50}{section*.53}%
+\contentsline {subsubsection}{Service Discovery}{51}{section*.54}%
+\contentsline {subsubsection}{Configuration of a Remote GATT Server}{52}{section*.55}%
