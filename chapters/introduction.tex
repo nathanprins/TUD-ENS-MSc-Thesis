@@ -39,11 +39,11 @@ The connection setup itself also has room for improvement. In the naive approach
 
 Considering the variability of the power harvesting methods that these devices employ, it is often advantageous to switch to a faster connection configuration when plenty of energy is available or even crucial to switch to a slower connection configuration to protect against a power failure. Using the procedures available within the BLE specification, it takes a fixed six packets for the central to apply the connection settings after accepting them from the peripheral. This takes anywhere between tens of milliseconds to a minute, depending on the active connection parameters. 
 
-Take as an example an intermittent device that takes its power from solar. If someone were to accidentally block the solar panel, then at the lowest connection settings, the device would not be able to throttle the connection fast enough to protect itself against a power failure. From all these remarks, we can gather at least three possible improvements of BLE for use within intermittently-powered devices:
+Take as an example an intermittent device that takes its power from solar. If someone were to accidentally block the solar panel, then at the lowest connection settings, the device would not be able to throttle the connection fast enough to protect itself against a power failure. From all these remarks, we can gather at least three possible goals to improve BLE for use within intermittently-powered devices:
 \begin{enumerate}
-    \item Allow the Peripheral to dictate the initial connection parameters.
-    \item Reduce the time required for the connection setup.
-    \item Reduce the time required to apply new connection parameters.
+    \item \textbf{Goal 1}: Allow the Peripheral to dictate the initial connection parameters.
+    \item \textbf{Goal 2}: Reduce the time required for the connection setup.
+    \item \textbf{Goal 3}: Reduce the time required to apply new connection parameters.
 \end{enumerate}
 This thesis will address these the above three points with the general goal of improving the viability of BLE for intermittently-powered devices.
 

@@ -6,9 +6,9 @@ This separation is made because the static performance improvement will be appli
 
 \section{Experimental Setup}
 \label{sec:evaluation_setup}
-The demo system described in Section \ref{sec:demo_application} was also used for all experiments. The central is an nRF52840DK development board, and the peripheral is the modified FreeBie platform. The nRF52840-Dongle was used as a sniffer for Wireshark. During the static testing, the Nordic Power Profiler Kit II (PPK-II) was used to power FreeBie and measure its power consumption. During the dynamic testing, the PPK-II was replaced with a 46.5$\mu\text{W}$ solar cell from Panasonic \cite{panasonic_solar}, and a Saleae Logic Pro 8 was used to capture digital and analog traces \cite{saleae_logic_pro_8}. Finally, an Ikea TRÅDFRI smart light was calibrated and controlled through \texttt{python} to simulate changing energy harvesting conditions. 
+The demo system described in Section \ref{sec:demo_application} was also used in all experiments. The central is an nRF52840DK development board \cite{nordic_nrf52840dk}, and the peripheral is the modified FreeBie platform \cite{freebie}. The nRF52840-Dongle was used as a sniffer for Wireshark \cite{nordic_dongle}. During the static testing, the Nordic Power Profiler Kit II (PPK-II, \cite{nordic_ppk2}) was used to power FreeBie and measure its power consumption. During the dynamic testing, the PPK-II was replaced with a 46.5$\mu\text{W}$ solar cell from Panasonic \cite{panasonic_solar}, and a Saleae Logic Pro 8} was used to capture digital and analog traces \cite{saleae_logic_pro_8}. Finally, an Ikea TRÅDFRI smart light was calibrated and controlled through \texttt{python} to simulate changing energy harvesting conditions. 
 
-The \texttt{CMakeLists} file has been retrofitted to enable easy switching between optimization stages during testing. Set the \texttt{CMake} variables according to Table \ref{tbl:stage_defs} to enable a specific stage.
+The \texttt{CMakeLists} file of both applications have been retrofitted to enable easy switching between optimization stages during testing. To enable a specific stage, the \texttt{CMake} variables must be set according to Table \ref{tbl:stage_defs}.
 \begin{table}
     \begin{center}
     \begin{tabular}{|l|l|l|l|l|}
@@ -33,7 +33,7 @@ The \texttt{CMakeLists} file has been retrofitted to enable easy switching betwe
 \section{Results}
 \label{sec:evaluation_results}
 
-\subsection{Static}
+\subsection{Static Evaluation}
 \label{sec:static_evaluation}
 % Number of Packets Plot
 \begin{figure}[]
@@ -45,7 +45,7 @@ The \texttt{CMakeLists} file has been retrofitted to enable easy switching betwe
     \label{fig:static_packet_division}
 \end{figure}
 
-When at the number of packets sent between the \texttt{CONNECT\_IND} packet and the first packet that does not belong to the connection setup, shown in Figure \ref{fig:static_packet_division}, a significant reduction can be seen. From Stage 0 (no modifications) to Stage 4 (all modifications) this is a reduction of \textbf{98.80\%}. When only sharing the preferred (slower) connection parameters (Stage 1), the average number of packets goes up by 0.7 packets. This increase in packets is a result of slightly more Empty PDUs as a result of different timing. Stage 2 still counts six packets for \textit{discovery}, even though service discovery caching is being used because reading the Database Hash requires three packets for both the central and peripheral. 
+Between the number of packets sent between the \texttt{CONNECT\_IND} packet and the first packet that does not belong to the connection setup, shown in Figure \ref{fig:static_packet_division}, a significant reduction can be seen. From Stage 0 (no modifications) to Stage 4 (all modifications) this is a reduction of \textbf{98.80\%}. When only sharing the preferred (slower) connection parameters (Stage 1), the average number of packets goes up by 0.7 packets. This increase in packets is a result of slightly more Empty PDUs as a result of different timing. Stage 2 still counts six packets for \textit{discovery}, even though service discovery caching is being used because reading the Database Hash requires three packets for both the central and peripheral. 
 
 % Setup Time Plot
 \begin{figure}[]
@@ -57,7 +57,7 @@ When at the number of packets sent between the \texttt{CONNECT\_IND} packet and 
     \label{fig:static_setup_time}
 \end{figure}
 
-Figure \ref{fig:static_setup_time} shows the time required to set up a connection, measured from \texttt{CONNECT\_IND} up to the last packet that does not belong to the connection. At first, Stage 1 through 3 seems significantly worse than stage 0. However, it is important to remember that in Stage 0, the peripheral is forced to use the default connection parameters of the central. As a result, our system needs to be designed with a much larger capacitor than required after the connection is established. Although slower, Stage 1 allows us to reduce the size of the capacitors used in our system, which allows the system to recover much faster after a full power failure, as well as reducing the overall size and cost of the system. Stage 4 reduces the connection setup to a single packet, resulting in a reduction of \textbf{99.93\%}.
+Figure \ref{fig:static_setup_time} shows the time required to set up a connection, measured from \texttt{CONNECT\_IND} up to the last packet that does not belong to the connection. At first, Stage 1 through 3 seems significantly worse than stage 0. However, it is important to remember that in Stage 0, the peripheral is forced to use the default connection parameters of the central. As a result, our system needs to be designed with a much larger capacitor than required after the connection is established. Although slower, Stage 1 allows us to reduce the size of the capacitors used in our system, which allows the system to recover much faster after a full power failure, as well as reducing the overall size and cost of the system. Stage 4 reduces the connection setup to a single packet, resulting in a reduction of \textbf{99.93\%} compared to Stage 0.
 
 % Time To Useful Packet Plot
 \begin{figure}[]
@@ -112,18 +112,18 @@ As one can see in Figure \ref{fig:static_power_consumption_conventional}a, when 
 
 Figure \ref{fig:static_power_consumption_intermittent} shows the energy used during the connection setup while intermittently-powered. Stage 3 and 4 show a significant reduction in energy consumed with \textbf{44.96\%} and \textbf{93.97\%}, respectively. However, Stage 1 and 2 might still be an improvement when intermittently-powered since the average current draw during connection setup is 68.96$\mu$A, and 71.13$\mu$A, compared to 1.21mA of Stage 0. This reduced continuous current draw might allow an intermittently-powered device to remain operational using Stage 1, while Stage 0 would result in the capacitor voltage becoming critically low.
 
-\subsection{Dynamic}
+\subsection{Dynamic Evaluation}
 \label{sec:dynamic_evaluation}
 \begin{figure}[]
     \centering
-    \includegraphics[width=1\textwidth,height=6cm,keepaspectratio=true]{plots/dynamic_short_both.png}
+    \includegraphics[width=0.9\textwidth,keepaspectratio=true]{plots/dynamic_short_both.png}
     \caption{
-        Connection Rate versus Light Output
+        Connection Rate versus Light Output. The average throughput when using Fast Reconnect (b) is 24.29\% higher and the peak throughput comes 15.86\% earlier when compared to using the regular Connection Update Request (a).
     }
     \label{fig:dynamic_short_both}
 \end{figure}
 
-Figure \ref{fig:dynamic_long_both} shows an optimal situation for using FRAPPUCcIno, which is a sharp increase followed by a sharp decrease in available power after using slow connection parameters. In this scenario, using Fast Reconnect allows an earlier rise, as well as allowing the system to respond in time to prevent a power failure. As a result, FRAPPUCcInO using Fast Reconnect is able to maintain an average throughput of \textbf{24.29\%} higher when compared to FRAPPUCcInO using the regular Connection Update Request. We define the responsiveness as the peak-to-peak time between the \textit{light output} and the \textit{connection rate}. Using this definition, FRAPPUCcInO with Fast reconnect reaches its peak 191 seconds after the light ouput rises, and FRAPPUCcInO using Connection Update Request reaches its peak after 227 seconds. The responsiveness is therefore improved by \textbf{15.86\%}.
+Figure \ref{fig:dynamic_long_both} shows an optimal situation for using FRAPPUCcIno, which is a sharp increase followed by a sharp decrease in available power after using slow connection parameters. In this scenario, using Fast Reconnect allows an earlier rise, as well as allowing the system to respond in time to prevent a power failure. As a result, FRAPPUCcInO using Fast Reconnect is able to maintain an average throughput of \textbf{24.29\%} higher when compared to FRAPPUCcInO using the regular Connection Update Request. We define the responsiveness as the peak-to-peak time between the \textit{light output} and the \textit{connection rate}. Using this definition, FRAPPUCcInO with Fast reconnect reaches its peak 191 seconds after the light output rises, and FRAPPUCcInO using Connection Update Request reaches its peak after 227 seconds. The responsiveness is therefore improved by \textbf{15.86\%}.
 
 
 \begin{figure}[]
