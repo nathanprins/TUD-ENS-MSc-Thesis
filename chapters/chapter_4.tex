@@ -4,9 +4,9 @@ The evaluation of our system is split up in a \textit{static} and a \textit{dyna
 
 This separation is made because the static performance improvement will be applicable to both intermittently-powered and conventionally-powered devices. Reducing connection setup time and power consumption on their own are attractive propositions since it improves responsiveness and battery life. The FRAPPUCcInO algorithm is not the only possible application of \textit{Fast Reconnect}. For example, Fast Reconnect could also be leveraged to quickly build a connection when ambient energy is insufficient for even the maximum connection interval, allowing a pseudo-connected state. 
 
-\section{Experimental Setup}
+% \section{Experimental Setup}
 \label{sec:evaluation_setup}
-The demo system described in Section \ref{sec:demo_application} was also used in all experiments. The central is an nRF52840DK development board \cite{nordic_nrf52840dk}, and the peripheral is the modified FreeBie platform \cite{freebie}. The nRF52840-Dongle was used as a sniffer for Wireshark \cite{nordic_dongle}. During the static testing, the Nordic Power Profiler Kit II (PPK-II, \cite{nordic_ppk2}) was used to power FreeBie and measure its power consumption. During the dynamic testing, the PPK-II was replaced with a 46.5$\mu\text{W}$ solar cell from Panasonic \cite{panasonic_solar}, and a Saleae Logic Pro 8} was used to capture digital and analog traces \cite{saleae_logic_pro_8}. Finally, an Ikea TRÅDFRI smart light was calibrated and controlled through \texttt{python} to simulate changing energy harvesting conditions. 
+The demo system described in Section \ref{sec:demo_application} was also used in all experiments. The central is an nRF52840DK development board \cite{nordic_nrf52840dk}, and the peripheral is the modified FreeBie platform \cite{freebie}. The nRF52840-Dongle was used as a sniffer for Wireshark \cite{nordic_dongle}. During the static testing, the Nordic Power Profiler Kit II (PPK-II, \cite{nordic_ppk2}) was used to power FreeBie and measure its power consumption. During the dynamic testing, the PPK-II was replaced with a 46.5$\mu\text{W}$ solar cell from Panasonic \cite{panasonic_solar}, and a Saleae Logic Pro 8 was used to capture digital and analog traces \cite{saleae_logic_pro_8}. Finally, an Ikea TRÅDFRI smart light was calibrated and controlled through \texttt{python} to simulate changing energy harvesting conditions. 
 
 The \texttt{CMakeLists} file of both applications have been retrofitted to enable easy switching between optimization stages during testing. To enable a specific stage, the \texttt{CMake} variables must be set according to Table \ref{tbl:stage_defs}.
 \begin{table}
@@ -116,7 +116,7 @@ Figure \ref{fig:static_power_consumption_intermittent} shows the energy used dur
 \label{sec:dynamic_evaluation}
 \begin{figure}[]
     \centering
-    \includegraphics[width=0.9\textwidth,keepaspectratio=true]{plots/dynamic_short_both.png}
+    \includegraphics[width=0.96\textwidth,keepaspectratio=true]{plots/dynamic_short_both.png}
     \caption{
         Connection Rate versus Light Output. The average throughput when using Fast Reconnect (b) is 24.29\% higher and the peak throughput comes 15.86\% earlier when compared to using the regular Connection Update Request (a).
     }
@@ -128,7 +128,7 @@ Figure \ref{fig:dynamic_long_both} shows an optimal situation for using FRAPPUCc
 
 \begin{figure}[]
     \centering
-    \includegraphics[width=1\textwidth,height=6cm,keepaspectratio=true]{plots/dynamic_long_both.png}
+    \includegraphics[width=0.96\textwidth,height=6cm,keepaspectratio=true]{plots/dynamic_long_both.png}
     \caption{
         Connection Rate versus Light Output. \textbf{left}) Connection Update Request. \textbf{right}) Fast Reconnect.
     }

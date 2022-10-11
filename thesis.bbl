@@ -1,0 +1,154 @@
+\begin{thebibliography}{10}
+
+\bibitem{arif_2021}
+{Arif, Rauf}.
+\newblock With an economic potential of \$11 trillion, internet of things is
+  here to revolutionize global economy.
+\newblock
+  \url{https://www.forbes.com/sites/raufarif/2021/06/05/with-an-economic-potential-of-11-trillion-internet-of-things-is-here-to-revolutionize-global-economy/?sh=1f82f8015f29},
+  2021.
+\newblock Last accessed: August 31st, 2022.
+
+\bibitem{bluetooth_spec}
+{Bluetooth SIG}.
+\newblock Core specification 5.3.
+\newblock
+  \url{https://www.bluetooth.com/specifications/specs/core-specification-5-3/},
+  2021.
+\newblock Last accessed: September 1st, 2022.
+
+\bibitem{bluetooth_supplement}
+{Bluetooth SIG}.
+\newblock Core specification supplement 5.3.
+\newblock
+  \url{https://www.bluetooth.com/specifications/specs/core-specification-supplement-10/},
+  2021.
+\newblock Last accessed: October 5th, 2022.
+
+\bibitem{colin_2018}
+Alexei Colin, Emily Ruppel, and Brandon Lucia.
+\newblock A reconfigurable energy storage architecture for energy-harvesting
+  devices.
+\newblock {\em SIGPLAN Not.}, 53(2):767–781, mar 2018.
+
+\bibitem{gameboy}
+Jasper de~Winkel, Vito Kortbeek, Josiah Hester, and Przemys\l{}aw Pawe\l{}czak.
+\newblock Battery-free game boy.
+\newblock {\em Proc. ACM Interact. Mob. Wearable Ubiquitous Technol.}, 4(3),
+  sep 2020.
+
+\bibitem{freebie}
+Jasper de~Winkel, Haozhe Tang, and Przemys\l{}aw Pawe\l{}czak.
+\newblock Intermittently-powered bluetooth that works.
+\newblock In {\em Proceedings of the 20th Annual International Conference on
+  Mobile Systems, Applications and Services}, MobiSys '22, page 287–301, New
+  York, NY, USA, 2022. Association for Computing Machinery.
+
+\bibitem{gollakota_2014}
+Shyamnath Gollakota, Matthew~S. Reynolds, Joshua~R. Smith, and David~J.
+  Wetherall.
+\newblock The emergence of rf-powered computing.
+\newblock {\em Computer}, 47(1):32--39, 2014.
+
+\bibitem{hester_2017}
+Josiah Hester and Jacob Sorber.
+\newblock The future of sensing is batteryless, intermittent, and awesome.
+\newblock In {\em Proceedings of the 15th ACM Conference on Embedded Network
+  Sensor Systems}, SenSys '17, New York, NY, USA, 2017. Association for
+  Computing Machinery.
+
+\bibitem{marr_2018}
+{Marr, Bernard}.
+\newblock Smart dust is coming. are you ready?
+\newblock
+  \url{https://www.forbes.com/sites/bernardmarr/2018/09/16/smart-dust-is-coming-are-you-ready/?sh=39bf23d05e41},
+  2018.
+\newblock Last accessed: August 31st, 2022.
+
+\bibitem{microsoft_2019}
+{Microsoft}.
+\newblock 2019 manufacturing trends report.
+\newblock
+  \url{https://info.microsoft.com/rs/157-GQE-382/images/EN-US-CNTNT-Report-2019-Manufacturing-Trends.pdf},
+  2019.
+\newblock Last accessed: August 31st, 2022.
+
+\bibitem{nordic_ppk2}
+{Nordic Semiconductor}.
+\newblock Nordic power profiler kit ii.
+
+\bibitem{nordic_nrf52840dk}
+{Nordic Semiconductor}.
+\newblock nrf52840 dk product page.
+
+\bibitem{nordic_dongle}
+{Nordic Semiconductor}.
+\newblock Nrf52840 dongle.
+
+\bibitem{nordic_softdevices}
+{Nordic Semiconductor}.
+\newblock Softdevices.
+
+\bibitem{nordic_2022}
+{Nordic Semiconductor}.
+\newblock Building a bluetooth application on nrf connect sdk - part 3
+  optimizing the connection.
+\newblock
+  \url{https://devzone.nordicsemi.com/guides/nrf-connect-sdk-guides/b/software/posts/building-a-bluetooth-application-on-nrf-connect-sdk-part-3-optimizing-the-connection},
+  2022.
+\newblock Last accessed: September 1st, 2022.
+
+\bibitem{packetcraft}
+{Packetcraft, Inc.}
+\newblock Packetcraft website.
+
+\bibitem{panasonic_solar}
+Panasonic.
+\newblock Panasonic am-1454ca datasheet.
+
+\bibitem{wisp_2005}
+M.~Philipose, J.R. Smith, B.~Jiang, A.~Mamishev, Sumit Roy, and
+  K.~Sundara-Rajan.
+\newblock Battery-free wireless identification and sensing.
+\newblock {\em IEEE Pervasive Computing}, 4(1):37--45, 2005.
+
+\bibitem{saleae_logic_pro_8}
+{Saleae}.
+\newblock Saleae logic pro 8 usb logic analyzer.
+
+\bibitem{satya_2019}
+Mahadev Satyanarayanan, Wei Gao, and Brandon Lucia.
+\newblock The computing landscape of the 21st century.
+\newblock In {\em Proceedings of the 20th International Workshop on Mobile
+  Computing Systems and Applications}, HotMobile '19, page 45–50, New York,
+  NY, USA, 2019. Association for Computing Machinery.
+
+\bibitem{bluetooth_market_update_2022}
+Bluetooth SIG.
+\newblock 2022 market update.
+\newblock \url{https://www.bluetooth.com/2022-market-update/}.
+
+\bibitem{bluetooth_sig_us}
+Bluetooth SIG.
+\newblock About us.
+\newblock \url{https://www.bluetooth.com/about-us/}.
+
+\bibitem{bluetooth_sig_name}
+Bluetooth SIG.
+\newblock Origin of the name bluetooth.
+\newblock \url{https://www.bluetooth.com/about-us/bluetooth-origin/}.
+
+\bibitem{ti_ble_dev_guide}
+{Texas Instruments}.
+\newblock Ti documentation for the ble protocol stack.
+
+\bibitem{zephyrproject}
+{The Linux Foundation Projects}.
+\newblock Zephyr project, Sep 2022.
+
+\bibitem{townsend_cufi}
+Kevin Townsend, Cufi Carles, Akiba, and Robert Davidson.
+\newblock {\em Getting started with Bluetooth Low Energy}.
+\newblock SPD, 2015.
+
+\end{thebibliography}

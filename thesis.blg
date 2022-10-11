@@ -1,0 +1,75 @@
+This is BibTeX, Version 0.99d
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: thesis.aux
+Reallocating 'name_of_file' (item size: 1) to 24 items.
+A level-1 auxiliary file: template/frontcover.aux
+Reallocating 'name_of_file' (item size: 1) to 23 items.
+A level-1 auxiliary file: template/titlepage.aux
+Reallocating 'name_of_file' (item size: 1) to 28 items.
+A level-1 auxiliary file: template/graduationdata.aux
+Reallocating 'name_of_file' (item size: 1) to 23 items.
+A level-1 auxiliary file: chapters/quotation.aux
+Reallocating 'name_of_file' (item size: 1) to 21 items.
+A level-1 auxiliary file: chapters/preface.aux
+Reallocating 'name_of_file' (item size: 1) to 26 items.
+A level-1 auxiliary file: chapters/introduction.aux
+Reallocating 'name_of_file' (item size: 1) to 23 items.
+A level-1 auxiliary file: chapters/chapter_2.aux
+Reallocating 'name_of_file' (item size: 1) to 23 items.
+A level-1 auxiliary file: chapters/chapter_3.aux
+Reallocating 'name_of_file' (item size: 1) to 23 items.
+A level-1 auxiliary file: chapters/chapter_4.aux
+Reallocating 'name_of_file' (item size: 1) to 24 items.
+A level-1 auxiliary file: chapters/futurework.aux
+Reallocating 'name_of_file' (item size: 1) to 25 items.
+A level-1 auxiliary file: chapters/conclusions.aux
+Reallocating 'name_of_file' (item size: 1) to 6 items.
+The style file: plain.bst
+Reallocating 'name_of_file' (item size: 1) to 31 items.
+Reallocating 'name_of_file' (item size: 1) to 24 items.
+A level-1 auxiliary file: chapters/appendix_a.aux
+Database file #1: ./bib/MyMScTUDENSThesisBibFile.bib
+Warning--I'm ignoring saleae_logic_pro_8's extra "author" field
+--line 433 of file ./bib/MyMScTUDENSThesisBibFile.bib
+You've used 26 entries,
+            2118 wiz_defined-function locations,
+            628 strings with 8005 characters,
+and the built_in function-call counts, 6769 in all, are:
+= -- 639
+> -- 295
+< -- 2
++ -- 124
+- -- 94
+* -- 319
+:= -- 1115
+add.period$ -- 78
+call.type$ -- 26
+change.case$ -- 124
+chr.to.int$ -- 0
+cite$ -- 26
+duplicate$ -- 257
+empty$ -- 612
+format.name$ -- 94
+if$ -- 1469
+int.to.chr$ -- 0
+int.to.str$ -- 26
+missing$ -- 9
+newline$ -- 130
+num.names$ -- 52
+pop$ -- 197
+preamble$ -- 1
+purify$ -- 99
+quote$ -- 0
+skip$ -- 249
+stack$ -- 0
+substring$ -- 223
+swap$ -- 60
+text.length$ -- 2
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 102
+warning$ -- 0
+while$ -- 57
+width$ -- 28
+write$ -- 260
+(There was 1 warning)

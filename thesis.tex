@@ -97,13 +97,13 @@
 \newcommand{\reportUrlEmailTUD}{\href{mailto:\reportEmailTUD}{\reportEmailTUD}}
 \newcommand{\reportUrlEmailNonTUD}{\href{mailto:\reportEmailNonTUD}{\reportEmailNonTUD}}
 \newcommand{\reportMSC}{Embedded Systems} % Examples are {Embedded Systems} {Computer Engineering} {Computer Science} or {Electrical Engineering}
-\newcommand{\reportDate}{TBD}
-\newcommand{\presentationDate}{TBD}
+\newcommand{\reportDate}{11-10-2022}
+\newcommand{\presentationDate}{13-10-2022}
 \newcommand{\graduationCommittee}{
-PUT THE NAME AND SURNAME OF GRADUATION COMMITTEE MEMBER 1 HERE & Delft University of Technology \\
-PUT THE NAME AND SURNAME OF GRADUATION COMMITTEE MEMBER 2 HERE & Delft University of Technology \\
+Dr. Przemysław Pawełczak & Delft University of Technology \\
+Dr. Asterios Katsifodimos & Delft University of Technology \\
 % ...
-PUT THE NAME AND SURNAME OF GRADUATION COMMITTEE MEMBER X HERE & Delft University of Technology \\
+Jasper de Winkel & Delft University of Technology \\
 }
 
 % Provide full name and surname (no abbreviations), so "Koen Langendoen" not "K. Langendoen"
@@ -122,9 +122,11 @@ PUT THE NAME AND SURNAME OF GRADUATION COMMITTEE MEMBER X HERE & Delft Universit
 % prof.\,dr.\,Koen Langendoen (chairman) & Delft University of Technology \\ 
 % dr.\,Przemys{\l}aw Pawe{\l}czak & Delft University of Technology \\ 
 
-\newcommand{\reportAbstract}{WRITE YOUR ABSTRACT HERE}
+\newcommand{\reportAbstract}{
+    The growing field of research into batteryless or intermittent systems has enabled Internet of Things applications that were previously impossible. For example, the FreeBie system recently introduced Bluetooth Low-Energy (BLE) to intermittent devices, making medium to long range bi-directional communication a reality for the first time. However, this achievement also highlighted that some inefficiencies considered acceptable for conventional systems are unacceptable when working in the intermittent domain. Our key insights are that intermittent peripherals should dictate the connection parameters and not the central, that connection setup overhead should be reduced as much as possible, and that connection parameter updates should be applied faster. To achieve these goals, we 1) introduce a method of sharing connection parameters before a connection is made, 2) introduce methods of caching connection setup packets together with a reconnect procedure called Fast Reconnect that reduces connection setup to a single packet, and 3) apply 1 and 2 in a dynamic algorithm called FRAPPUCcInO that controls connection rate based on energy harvesting capabilities. These three solutions allow intermittent BLE to be used in environments with less ambiently available energy than before by improving efficiency and responsiveness.
+}
 
-\newcommand{\reportKeywords}{LIST YOUR KEYWORDS HERE}
+\newcommand{\reportKeywords}{Energy Harvesting, Intermittent Devices, Batteryless Devices, Bluetooth Low-Energy(BLE), Internet of Things (IoT), Embedded Systems}
 
 % Did the thesis lead to a paper? 
 % e.g. The work presented in this thesis has lead to a paper which has been submitted to a conference for publication, pending peer-review
@@ -195,15 +197,15 @@ PUT THE NAME AND SURNAME OF GRADUATION COMMITTEE MEMBER X HERE & Delft Universit
 % Create Introduction: page 1
 \include{chapters/introduction}
 
-% Create chapters
+% % Create chapters
 \include{chapters/chapter_2}
 \include{chapters/chapter_3}
 \include{chapters/chapter_4}
 
-% Create future work
+% % Create future work
 \include{chapters/futurework}
 
-% Create conclusions
+% % Create conclusions
 \include{chapters/conclusions}
 
 

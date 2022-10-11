@@ -34,27 +34,26 @@
 \contentsline {section}{\numberline {3.3}Faster Connection Parameter Adaption}{26}{section.3.3}%
 \contentsline {subsection}{\numberline {3.3.1}FRAPPUCInO}{27}{subsection.3.3.1}%
 \contentsline {chapter}{\numberline {4}Evaluation}{31}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Experimental Setup}{31}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Results}{32}{section.4.2}%
-\contentsline {subsection}{\numberline {4.2.1}Static Evaluation}{32}{subsection.4.2.1}%
-\contentsline {subsection}{\numberline {4.2.2}Dynamic Evaluation}{35}{subsection.4.2.2}%
-\contentsline {chapter}{\numberline {5}Future Work}{37}{chapter.5}%
-\contentsline {chapter}{\numberline {6}Conclusions}{39}{chapter.6}%
-\contentsline {chapter}{\numberline {A}Demo System}{41}{appendix.A}%
-\contentsline {section}{\numberline {A.1}Using the System}{41}{section.A.1}%
-\contentsline {subsection}{\numberline {A.1.1}Connecting and Powering the System}{41}{subsection.A.1.1}%
-\contentsline {subsection}{\numberline {A.1.2}Using the Terminal}{42}{subsection.A.1.2}%
-\contentsline {subsection}{\numberline {A.1.3}Making a Connection}{43}{subsection.A.1.3}%
-\contentsline {subsection}{\numberline {A.1.4}GATT Services and Characteristics}{43}{subsection.A.1.4}%
-\contentsline {section}{\numberline {A.2}System Implementation}{44}{section.A.2}%
-\contentsline {subsection}{\numberline {A.2.1}Packetcraft}{44}{subsection.A.2.1}%
-\contentsline {subsubsection}{Registering GATT Services with the ATT server}{44}{section*.46}%
-\contentsline {subsubsection}{Supporting Notifications for a Client}{45}{section*.47}%
-\contentsline {subsubsection}{Service Discovery}{46}{section*.48}%
-\contentsline {subsubsection}{Configuration of a Remote GATT Server}{47}{section*.49}%
-\contentsline {subsubsection}{Custom Discovery and Configuration Procedure}{47}{section*.50}%
-\contentsline {subsection}{\numberline {A.2.2}Zephyr}{48}{subsection.A.2.2}%
-\contentsline {subsubsection}{Registering GATT Services with the ATT server}{48}{section*.51}%
-\contentsline {subsubsection}{Supporting Notifications for Clients}{48}{section*.52}%
-\contentsline {subsubsection}{Service Discovery}{49}{section*.53}%
-\contentsline {subsubsection}{Configuration of a Remote GATT Server}{50}{section*.54}%
+\contentsline {section}{\numberline {4.1}Results}{31}{section.4.1}%
+\contentsline {subsection}{\numberline {4.1.1}Static Evaluation}{31}{subsection.4.1.1}%
+\contentsline {subsection}{\numberline {4.1.2}Dynamic Evaluation}{36}{subsection.4.1.2}%
+\contentsline {chapter}{\numberline {5}Future Work}{39}{chapter.5}%
+\contentsline {chapter}{\numberline {6}Conclusions}{41}{chapter.6}%
+\contentsline {chapter}{\numberline {A}Demo System}{45}{appendix.A}%
+\contentsline {section}{\numberline {A.1}Using the System}{45}{section.A.1}%
+\contentsline {subsection}{\numberline {A.1.1}Connecting and Powering the System}{45}{subsection.A.1.1}%
+\contentsline {subsection}{\numberline {A.1.2}Using the Terminal}{46}{subsection.A.1.2}%
+\contentsline {subsection}{\numberline {A.1.3}Making a Connection}{47}{subsection.A.1.3}%
+\contentsline {subsection}{\numberline {A.1.4}GATT Services and Characteristics}{47}{subsection.A.1.4}%
+\contentsline {section}{\numberline {A.2}System Implementation}{48}{section.A.2}%
+\contentsline {subsection}{\numberline {A.2.1}Packetcraft}{48}{subsection.A.2.1}%
+\contentsline {subsubsection}{Registering GATT Services with the ATT server}{48}{section*.47}%
+\contentsline {subsubsection}{Supporting Notifications for a Client}{49}{section*.48}%
+\contentsline {subsubsection}{Service Discovery}{50}{section*.49}%
+\contentsline {subsubsection}{Configuration of a Remote GATT Server}{51}{section*.50}%
+\contentsline {subsubsection}{Custom Discovery and Configuration Procedure}{51}{section*.51}%
+\contentsline {subsection}{\numberline {A.2.2}Zephyr}{52}{subsection.A.2.2}%
+\contentsline {subsubsection}{Registering GATT Services with the ATT server}{52}{section*.52}%
+\contentsline {subsubsection}{Supporting Notifications for Clients}{52}{section*.53}%
+\contentsline {subsubsection}{Service Discovery}{53}{section*.54}%
+\contentsline {subsubsection}{Configuration of a Remote GATT Server}{54}{section*.55}%
